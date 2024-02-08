@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace Adrian.Tests;
 public class Api : WebApplicationFactory<Program>
@@ -55,8 +58,9 @@ public class IntegrationTests : IntegrationTest
     [Fact]
     public async Task Integration_Api()
     {
-        var response = await HttpClient.GetAsync("/weatherforecast");
-        response.EnsureSuccessStatusCode();
+        var order = new CriacaoAlunoCommand(NewId.NextGuid(), "teste");
+        var submitOrderResponse = await HttpClient.GetAsync($"/weatherforecast?nome={order.Nome}");
+        submitOrderResponse.EnsureSuccessStatusCode();
     }
 
     [Fact]
@@ -81,7 +85,7 @@ public class IntegrationTests : IntegrationTest
         AlunoCriadoEvent @event = new AlunoCriadoEvent(orderId, "Teste");
 
         using var tokenSource = ExpiringCancellationToken();
-        await Producer.Send(@event, tokenSource.Token);
+        await Producer.SendAsync(@event, tokenSource.Token);
         Assert.True(await TestHarness.Published.Any<AlunoCriadoEvent>());
     }
 

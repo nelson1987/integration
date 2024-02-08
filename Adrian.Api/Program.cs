@@ -28,16 +28,17 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", (CancellationToken cancellationToken) =>
+app.MapGet("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handler, [FromQuery] string nome, CancellationToken cancellationToken) =>
 {
-    return "";
+    var result = await handler.GetAsync(new BuscaAlunoQuery(Guid.NewGuid(), nome), cancellationToken);
+    return result.ValueOrDefault;
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
 app.MapPost("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handler, CriacaoAlunoCommand command, CancellationToken cancellationToken) =>
 {
-    await handler.Handle(command, cancellationToken);
+    await handler.PostAsync(command, cancellationToken);
 })
 .WithName("PostWeatherForecast")
 .WithOpenApi();

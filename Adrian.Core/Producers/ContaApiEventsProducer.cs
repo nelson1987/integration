@@ -7,7 +7,7 @@ namespace Adrian.Core.Producers;
 
 public interface IProducer<TEvent> where TEvent : class
 {
-    Task<Result> Send(TEvent @event, CancellationToken cancellationToken);
+    Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken);
 }
 public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
 {
@@ -20,7 +20,7 @@ public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
         _logger = logger;
     }
 
-    public async Task<Result> Send(TEvent @event, CancellationToken cancellationToken)
+    public async Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Mensagem a ser produzida {nameof(@event)}.");
         await _producer.Publish(@event, cancellationToken);
