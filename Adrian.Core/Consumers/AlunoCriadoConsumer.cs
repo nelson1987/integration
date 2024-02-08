@@ -24,7 +24,7 @@ public class AlunoCriadoConsumer : IConsumer<AlunoCriadoEvent>
             Nome = @event.Nome
         };
         _logger.LogInformation($"Mensagem a ser persistida {nameof(@event)}.");
-        await _persistence.Insert(entidade, CancellationToken.None);
+        await _persistence.CreateAsync(entidade, CancellationToken.None);
         _logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
 
         //await context.RespondAsync<AlunoPersistidoEvent>(new AlunoPersistidoEvent());
