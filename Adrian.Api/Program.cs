@@ -1,4 +1,6 @@
 using Adrian.Core;
+using Adrian.Core.Commands;
+using Adrian.Core.Handlers;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,20 +28,18 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handler, CancellationToken cancellationToken) =>
+app.MapGet("/weatherforecast", (CancellationToken cancellationToken) =>
 {
-    await handler.Handle(new CriacaoAlunoCommand(), cancellationToken);
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return "";
 })
 .WithName("GetWeatherForecast")
+.WithOpenApi();
+
+app.MapPost("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handler, CriacaoAlunoCommand command, CancellationToken cancellationToken) =>
+{
+    await handler.Handle(command, cancellationToken);
+})
+.WithName("PostWeatherForecast")
 .WithOpenApi();
 
 app.Run();
