@@ -33,10 +33,10 @@ public class CriacaoAlunoHandler : ICriacaoAlunoHandler
         _reader = reader;
     }
 
-    public async Task<Result<List<Aluno>>> GetAsync(BuscaAlunoQuery command, CancellationToken cancellationToken)
+    public async Task<Result<Aluno?>> GetAsync(BuscaAlunoQuery command, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"{nameof(command)}:{command.ToJson()}");
-        return Result.Ok(await _reader.FindAsync(command, cancellationToken));
+        return Result.Ok(await _reader.GetAsync(command.Id, cancellationToken));
     }
 
     public async Task<Result> PostAsync(CriacaoAlunoCommand command, CancellationToken cancellationToken)

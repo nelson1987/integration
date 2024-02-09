@@ -4,7 +4,9 @@ using Adrian.Core.Handlers;
 using Adrian.Core.Producers;
 using Adrian.Core.Repositories.Persistences;
 using Adrian.Core.Repositories.Readers;
+using Adrian.Core.Settings;
 using MassTransit;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Adrian.Core;
