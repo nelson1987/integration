@@ -21,12 +21,6 @@ public class Api : WebApplicationFactory<Program>
                    {
                        x.AddDelayedMessageScheduler();
                        x.AddConsumer<AlunoCriadoConsumer>();
-                       //x.UsingInMemory((context, cfg) =>
-                       //{
-                       //    cfg.UseDelayedMessageScheduler();
-
-                       //    cfg.ConfigureEndpoints(context);
-                       //});
                    });
                });
 }
