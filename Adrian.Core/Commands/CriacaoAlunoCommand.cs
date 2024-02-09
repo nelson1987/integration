@@ -1,3 +1,3 @@
 ﻿namespace Adrian.Core.Commands;
 
-public record CriacaoAlunoCommand(Guid Id, string Nome);
+public record CriacaoAlunoCommand(Guid Id, string Nome) : ICommand;

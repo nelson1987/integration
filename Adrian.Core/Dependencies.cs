@@ -20,6 +20,7 @@ public static class Dependencies
         services.AddScoped<IProducer<AlunoCriadoEvent>, ContaApiEventsProducer>();
         return services;
     }
+
     public static IServiceCollection AddMassTransit(this IServiceCollection services)
     //, IConfiguration configuration)
     {

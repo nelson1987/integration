@@ -1,3 +1,5 @@
-﻿namespace Adrian.Core.Events;
+﻿using Adrian.Core.Commands;
 
-public record AlunoCriadoEvent(Guid Id, string Nome);
+namespace Adrian.Core.Events;
+
+public record AlunoCriadoEvent(Guid Id, string Nome) : ICommand;
