@@ -29,9 +29,9 @@ public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
 
     }
 }
-public class ContaApiEventsProducer : Producer<AlunoCriadoEvent>
+public class ContaApiEventsProducer : Producer<CriacaoCandidatoEvent>
 {
-    public ContaApiEventsProducer(IBus producer, ILogger<Producer<AlunoCriadoEvent>> logger) : base(producer, logger)
+    public ContaApiEventsProducer(IBus producer, ILogger<Producer<CriacaoCandidatoEvent>> logger) : base(producer, logger)
     {
     }
 }

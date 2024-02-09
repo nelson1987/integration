@@ -15,4 +15,13 @@
 		<PackageReference Include="MongoDB.Driver" Version="2.23.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Features\1_CriacaoCandidato\" />
+	  <Folder Include="Features\2_MatriculaProva\" />
+	  <Folder Include="Features\3_RealizaProva\" />
+	  <Folder Include="Features\4_PassaProva\" />
+	  <Folder Include="Features\5_InscricaoTurma\" />
+	  <Folder Include="Features\6_EscolheMateria\" />
+	</ItemGroup>
+
 </Project>

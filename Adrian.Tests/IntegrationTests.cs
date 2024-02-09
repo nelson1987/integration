@@ -20,7 +20,13 @@ public class Api : WebApplicationFactory<Program>
                    services.AddMassTransitTestHarness(x =>
                    {
                        x.AddDelayedMessageScheduler();
-                       x.AddConsumer<AlunoCriadoConsumer>();
+                       x.AddConsumer<CriacaoCandidatoConsumer>();
+                       //x.UsingInMemory((context, cfg) =>
+                       //{
+                       //    cfg.UseDelayedMessageScheduler();
+
+                       //    cfg.ConfigureEndpoints(context);
+                       //});
                    });
                });
 }
@@ -30,13 +36,13 @@ public class IntegrationTest
     public HttpClient HttpClient;
     public Api Api;
     public ITestHarness TestHarness;
-    public IProducer<AlunoCriadoEvent> Producer;
+    public IProducer<CriacaoCandidatoEvent> Producer;
     public IntegrationTest()
     {
         Api = new Api();
         HttpClient = Api.CreateClient();
         TestHarness = Api.Services.GetTestHarness();
-        Producer = Api.Services.GetRequiredService<IProducer<AlunoCriadoEvent>>();
+        Producer = Api.Services.GetRequiredService<IProducer<CriacaoCandidatoEvent>>();
     }
 }
 
@@ -49,7 +55,7 @@ public class IntegrationTests : IntegrationTest
     [Fact]
     public async Task Integration_Api()
     {
-        var order = new CriacaoAlunoCommand(NewId.NextGuid(), "teste");
+        var order = new CriacaoCandidatoCommand("nome", "documento");
         var submitOrderResponse = await HttpClient.GetAsync($"/weatherforecast?nome={order.Nome}");
         submitOrderResponse.EnsureSuccessStatusCode();
     }
@@ -57,27 +63,28 @@ public class IntegrationTests : IntegrationTest
     [Fact]
     public async Task Integration_To_PubSub()
     {
-        var orderId = NewId.NextGuid();
+        var documento = NewId.NextGuid().ToString();
 
         var submitOrderResponse = await HttpClient.PostAsync("/weatherforecast",
-            JsonContent.Create(new CriacaoAlunoCommand(orderId, "teste")));
+            JsonContent.Create(new CriacaoCandidatoCommand("nome", documento)));
         submitOrderResponse.EnsureSuccessStatusCode();
 
-        var sagaTestHarness = TestHarness.GetConsumerHarness<AlunoCriadoConsumer>();
+        var sagaTestHarness = TestHarness.GetConsumerHarness<CriacaoCandidatoConsumer>();
 
-        Assert.True(await TestHarness.Published.Any<AlunoCriadoEvent>());
-        Assert.True(await sagaTestHarness.Consumed.Any<AlunoCriadoEvent>(x => x.Context.Message.Id == orderId));
+        Assert.True(await TestHarness.Published.Any<CriacaoCandidatoEvent>());
+        Assert.True(await sagaTestHarness.Consumed.Any<CriacaoCandidatoEvent>(x => x.Context.Message.Documento == documento));
     }
 
     [Fact]
     public async Task Integration_PubSub()
     {
+        var documento = NewId.NextGuid().ToString();
         var orderId = NewId.NextGuid();
-        AlunoCriadoEvent @event = new AlunoCriadoEvent(orderId, "Teste");
+        CriacaoCandidatoEvent @event = new CriacaoCandidatoEvent("nome", documento);
 
         using var tokenSource = ExpiringCancellationToken();
         await Producer.SendAsync(@event, tokenSource.Token);
-        Assert.True(await TestHarness.Published.Any<AlunoCriadoEvent>());
+        Assert.True(await TestHarness.Published.Any<CriacaoCandidatoEvent>());
     }
 
     private static CancellationTokenSource ExpiringCancellationToken(int msTimeout = 150)

@@ -10,26 +10,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Adrian.Core.Handlers;
 
-public interface ICriacaoAlunoHandler
+public interface IAlunoHandler
 {
-    Task<Result<List<Aluno>>> GetAsync(BuscaAlunoQuery command, CancellationToken cancellationToken);
-    Task<Result> PostAsync(CriacaoAlunoCommand command, CancellationToken cancellationToken);
+    Task<Result<Aluno?>> GetAsync(BuscaAlunoQuery command, CancellationToken cancellationToken);
+    Task<Result> CreateCandidateAsync(CriacaoCandidatoCommand command, CancellationToken cancellationToken);
 }
-public class CriacaoAlunoHandler : ICriacaoAlunoHandler
+public class AlunoHandler : IAlunoHandler
 {
-    private readonly ILogger<CriacaoAlunoHandler> _logger;
-    private readonly IAlunoPersistence _persistence;
+    private readonly ILogger<AlunoHandler> _logger;
     private readonly IAlunoReader _reader;
-    private readonly IProducer<AlunoCriadoEvent> _eventsProducer;
+    private readonly IProducer<CriacaoCandidatoEvent> _eventsProducer;
 
-    public CriacaoAlunoHandler(ILogger<CriacaoAlunoHandler> logger, 
-                                IProducer<AlunoCriadoEvent> eventsProducer,
-                                IAlunoPersistence persistence, 
+    public AlunoHandler(ILogger<AlunoHandler> logger, 
+                                IProducer<CriacaoCandidatoEvent> eventsProducer,
                                 IAlunoReader reader)
     {
         _logger = logger;
         _eventsProducer = eventsProducer;
-        _persistence = persistence;
         _reader = reader;
     }
 
@@ -38,11 +35,10 @@ public class CriacaoAlunoHandler : ICriacaoAlunoHandler
         _logger.LogInformation($"{nameof(command)}:{command.ToJson()}");
         return Result.Ok(await _reader.GetAsync(command.Id, cancellationToken));
     }
-
-    public async Task<Result> PostAsync(CriacaoAlunoCommand command, CancellationToken cancellationToken)
+    public async Task<Result> CreateCandidateAsync(CriacaoCandidatoCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"{nameof(command)}:{command.ToJson()}");
-        var produtor = await _eventsProducer.SendAsync(new AlunoCriadoEvent(command.Id, command.Nome), cancellationToken);
+        var produtor = await _eventsProducer.SendAsync(new CriacaoCandidatoEvent(command.Nome, command.Documento), cancellationToken);
         return produtor.IsFailed ? Result.Fail(produtor.Errors.ToString()) : Result.Ok();
     }
 }

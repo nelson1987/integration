@@ -23,12 +23,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handler, [FromQuery] string nome, CancellationToken cancellationToken) =>
+app.MapGet("/weatherforecast", async ([FromServices] IAlunoHandler handler, [FromQuery] string nome, CancellationToken cancellationToken) =>
 {
     var result = await handler.GetAsync(new BuscaAlunoQuery(Guid.NewGuid(), nome), cancellationToken);
     return result.ValueOrDefault;
@@ -36,9 +31,9 @@ app.MapGet("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handle
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
-app.MapPost("/weatherforecast", async ([FromServices] ICriacaoAlunoHandler handler, CriacaoAlunoCommand command, CancellationToken cancellationToken) =>
+app.MapPost("/weatherforecast", async ([FromServices] IAlunoHandler handler, CriacaoCandidatoCommand command, CancellationToken cancellationToken) =>
 {
-    await handler.PostAsync(command, cancellationToken);
+    await handler.CreateCandidateAsync(command, cancellationToken);
 })
 .WithName("PostWeatherForecast")
 .WithOpenApi();
