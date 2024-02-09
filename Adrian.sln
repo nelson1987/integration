@@ -5,13 +5,15 @@ VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0D56764D-0D31-43EB-B309-3E7316F3F8A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adrian.Api", "Adrian.Api\Adrian.Api.csproj", "{352DFA24-82FD-48BF-93A5-9B79CA277976}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adrian.Api", "Adrian.Api\Adrian.Api.csproj", "{352DFA24-82FD-48BF-93A5-9B79CA277976}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F759C328-43CF-458D-9AE4-C83A54CD8D75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adrian.Tests", "Adrian.Tests\Adrian.Tests.csproj", "{A642C88B-0DAE-452E-B93C-36EA74734C8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adrian.Tests", "Adrian.Tests\Adrian.Tests.csproj", "{A642C88B-0DAE-452E-B93C-36EA74734C8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adrian.Core", "Adrian.Core\Adrian.Core.csproj", "{AA87FD7C-96CB-4F8B-B2FB-F5D3E45F09EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adrian.Core", "Adrian.Core\Adrian.Core.csproj", "{AA87FD7C-96CB-4F8B-B2FB-F5D3E45F09EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Course.Tests", "Course.Tests\Course.Tests.csproj", "{E27CEA6C-48C7-481B-9789-B9079271701A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{AA87FD7C-96CB-4F8B-B2FB-F5D3E45F09EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA87FD7C-96CB-4F8B-B2FB-F5D3E45F09EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA87FD7C-96CB-4F8B-B2FB-F5D3E45F09EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E27CEA6C-48C7-481B-9789-B9079271701A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E27CEA6C-48C7-481B-9789-B9079271701A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E27CEA6C-48C7-481B-9789-B9079271701A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E27CEA6C-48C7-481B-9789-B9079271701A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 		{352DFA24-82FD-48BF-93A5-9B79CA277976} = {0D56764D-0D31-43EB-B309-3E7316F3F8A4}
 		{A642C88B-0DAE-452E-B93C-36EA74734C8C} = {F759C328-43CF-458D-9AE4-C83A54CD8D75}
 		{AA87FD7C-96CB-4F8B-B2FB-F5D3E45F09EA} = {0D56764D-0D31-43EB-B309-3E7316F3F8A4}
+		{E27CEA6C-48C7-481B-9789-B9079271701A} = {F759C328-43CF-458D-9AE4-C83A54CD8D75}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D7FEDFA8-49AD-4E93-8700-C2D3B1FEEBB3}
