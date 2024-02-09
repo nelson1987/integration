@@ -1,5 +1,6 @@
 ﻿using Adrian.Core.Entities;
 using MongoDB.Driver;
+using static MongoDB.Driver.WriteConcern;
 
 namespace Adrian.Core.Repositories.Persistences;
 
@@ -34,12 +35,14 @@ public class AlunoPersistence : IAlunoPersistence
 
     public async Task UpdateAsync(Aluno aluno, StatusAluno status, CancellationToken cancellationToken = default)
     {
+        var filter = Builders<Aluno>.Filter
+            .Eq(x => x.Id, aluno.Id);
         var update = Builders<Aluno>.Update
             .Set(x => x.Status, aluno.Status);
+        var result = await _alunosCollection.UpdateOneAsync(filter, update);
 
-        await _alunosCollection.UpdateOneAsync(
-            x => x.Id == aluno.Id, update,
-            cancellationToken: cancellationToken);
+        Console.WriteLine($"Updated documents: {result.ModifiedCount}");
+        Console.WriteLine($"Result acknowledged? {result.IsAcknowledged}");
     }
 }
 

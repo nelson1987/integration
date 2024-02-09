@@ -1,6 +1,7 @@
 ﻿using Adrian.Core.Entities;
 using Adrian.Core.Events;
 using Adrian.Core.Extensions;
+using Adrian.Core.Producers;
 using Adrian.Core.Repositories.Persistences;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -28,9 +29,14 @@ public class CriacaoCandidatoConsumer : IConsumer<CriacaoCandidatoEvent>
             Status = StatusAluno.Criado
         };
         _logger.LogInformation($"Mensagem a ser persistida {nameof(@event)}.{@event.ToJson()}");
-        await _persistence.CreateAsync(entidade, CancellationToken.None);
+        using var tokenSource = ExpiringCancellationToken();
+        await _persistence.CreateAsync(entidade, tokenSource.Token);
         _logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
-
         await context.RespondAsync(new AlunoMatriculadoEvent(entidade.Id, entidade.Nome, entidade.Documento));
+    }
+    private static CancellationTokenSource ExpiringCancellationToken(int msTimeout = 150)
+    {
+        var timeout = TimeSpan.FromMilliseconds(msTimeout);
+        return new CancellationTokenSource(timeout);
     }
 }

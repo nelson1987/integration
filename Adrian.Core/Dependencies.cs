@@ -35,7 +35,7 @@ public static class Dependencies
         };
         var mongoClient = new MongoClient(settings.MongoClient);
         services.AddSingleton(mongoClient.GetDatabase(settings.Database));
-        services.AddSingleton<IUnitOfWork, UnitOfWork>();
+        services.AddTransient<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IAlunoHandler, AlunoHandler>();
         services.AddScoped<IAlunoPersistence, AlunoPersistence>();

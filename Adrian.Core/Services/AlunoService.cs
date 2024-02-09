@@ -42,7 +42,6 @@ public class AlunoService : IAlunoService
         Aluno entidade = await _reader.GetAsync(command.Id, cancellationToken);
         _logger.LogInformation($"Mensagem a ser persistida {nameof(entidade)}.");
         await _persistence.UpdateAsync(entidade, StatusAluno.MatriculaMateria, CancellationToken.None);
-
         _logger.LogInformation($"Mensagem persistida {nameof(entidade)}.");
         await session.CommitTransaction(cancellationToken);
     }
@@ -61,14 +60,15 @@ public class AlunoService : IAlunoService
 
     public async Task MatricularAsync(MatriculaAlunoCommand command, CancellationToken cancellationToken)
     {
-        await using var session = await _unitOfWork.StartSession(cancellationToken);
-        session.StartTransaction();
+        //await using var session = await _unitOfWork.StartSession(cancellationToken);
+        //session.StartTransaction();
         _logger.LogInformation($"{nameof(command)}:{command.ToJson()}");
         var entidade = await _reader.GetAsync(command.Id,cancellationToken);
         _logger.LogInformation($"Mensagem a ser persistida {nameof(entidade)}.");
         await _persistence.UpdateAsync(entidade!, StatusAluno.Matriculado, CancellationToken.None);
         _logger.LogInformation($"Mensagem persistida {nameof(entidade)}.");
-        await session.CommitTransaction(cancellationToken);
+        //await session.CommitTransaction(cancellationToken);
+
     }
 
     public async Task PassarProvaAsync(PassaProvaCommand command, CancellationToken cancellationToken)

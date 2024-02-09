@@ -19,10 +19,17 @@ public class InscricaoTurmaConsumer : IConsumer<AlunoInscritoEvent>
 
     public async Task Consume(ConsumeContext<AlunoInscritoEvent> context)
     {
+        _logger.LogInformation($"Mensagem a ser persistida {nameof(InscricaoTurmaConsumer)}.");
         AlunoInscritoEvent @event = context.Message;
         MatriculaAlunoCommand command = new MatriculaAlunoCommand(@event.Id, @event.Nome, @event.Documento);
-        await _service.MatricularAsync(command, CancellationToken.None);
-        _logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
+        //using var tokenSource = ExpiringCancellationToken();
+        //await _service.MatricularAsync(command, tokenSource.Token);
+        //_logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
         await context.RespondAsync(new AlunoTurmaInseridaEvent(command.Id, command.Nome, command.Documento));
+    }
+    private static CancellationTokenSource ExpiringCancellationToken(int msTimeout = 150)
+    {
+        var timeout = TimeSpan.FromMilliseconds(msTimeout);
+        return new CancellationTokenSource(timeout);
     }
 }
