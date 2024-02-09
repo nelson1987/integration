@@ -28,7 +28,7 @@ public class MatriculaAlunoConsumer : IConsumer<AlunoMatriculadoEvent>
         using var tokenSource = ExpiringCancellationToken();
         await _service.MatricularAsync(command, CancellationToken.None);
         _logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
-        await context.RespondAsync(new AlunoCompareceuEvent(command.Id, command.Nome, command.Documento));
+        await context.Publish(new AlunoCompareceuEvent(command.Id, command.Nome, command.Documento));
     }
     private static CancellationTokenSource ExpiringCancellationToken(int msTimeout = 150)
     {

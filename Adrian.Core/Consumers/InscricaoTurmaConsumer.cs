@@ -25,7 +25,7 @@ public class InscricaoTurmaConsumer : IConsumer<AlunoInscritoEvent>
         //using var tokenSource = ExpiringCancellationToken();
         //await _service.MatricularAsync(command, tokenSource.Token);
         //_logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
-        await context.RespondAsync(new AlunoTurmaInseridaEvent(command.Id, command.Nome, command.Documento));
+        await context.Publish(new AlunoTurmaInseridaEvent(command.Id, command.Nome, command.Documento));
     }
     private static CancellationTokenSource ExpiringCancellationToken(int msTimeout = 150)
     {

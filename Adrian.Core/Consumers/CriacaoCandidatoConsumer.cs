@@ -32,7 +32,7 @@ public class CriacaoCandidatoConsumer : IConsumer<CriacaoCandidatoEvent>
         using var tokenSource = ExpiringCancellationToken();
         await _persistence.CreateAsync(entidade, tokenSource.Token);
         _logger.LogInformation($"Mensagem persistida {nameof(@event)}.");
-        await context.RespondAsync(new AlunoMatriculadoEvent(entidade.Id, entidade.Nome, entidade.Documento));
+        await context.Publish(new AlunoMatriculadoEvent(entidade.Id, entidade.Nome, entidade.Documento));
     }
     private static CancellationTokenSource ExpiringCancellationToken(int msTimeout = 150)
     {
