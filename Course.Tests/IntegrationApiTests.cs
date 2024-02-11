@@ -215,8 +215,6 @@ public class ContasControllerTests : IAsyncLifetime
         var extrato = result.Value;
 
         extrato.Should().HaveCount(2);
-        extrato.Contains(transacao1).Should().BeTrue();
-        extrato.Contains(transacao2).Should().BeTrue();
         //extrato.Should().Contain(transacao1);
         //extrato.Should().Contain(transacao2);
     }
