@@ -1,6 +1,5 @@
 ﻿using Adrian.Core.Entities;
 using MongoDB.Driver;
-using static MongoDB.Driver.WriteConcern;
 
 namespace Adrian.Core.Repositories.Persistences;
 
@@ -13,7 +12,7 @@ public interface IAlunoPersistence
 public class AlunoPersistence : IAlunoPersistence
 {
     private readonly IMongoCollection<Aluno> _alunosCollection;
-    
+
     public AlunoPersistence(IUnitOfWork unitOfWork)
     {
         //var settings = new MongoSettings()
@@ -30,6 +29,7 @@ public class AlunoPersistence : IAlunoPersistence
     public void Create(Aluno newBook) =>
         _alunosCollection.InsertOne(newBook);
 
+    [Obsolete]
     public async Task CreateAsync(Aluno newBook, CancellationToken cancellationToken = default) =>
         await _alunosCollection.InsertOneAsync(newBook, cancellationToken);
 

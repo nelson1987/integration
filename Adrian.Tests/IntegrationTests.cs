@@ -79,7 +79,7 @@ public class IntegrationTests : IntegrationTest
     public async Task Integration_PubSub()
     {
         var documento = NewId.NextGuid().ToString();
-        var orderId = NewId.NextGuid();
+
         CriacaoCandidatoEvent @event = new CriacaoCandidatoEvent("nome", documento);
 
         using var tokenSource = ExpiringCancellationToken();
