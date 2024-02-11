@@ -88,7 +88,7 @@ public class UnitServicesTests
         _validatorMock = _fixture.Freeze<Mock<IValidator<InclusaoContaCommand>>>();
         _validatorMock
              .Setup(x => x.Validate(_request))
-             .Returns(new ValidationResult());
+             .Returns(new FluentValidation.Results.ValidationResult());
 
         //var conta = _fixture.Build<Conta>()
         //    //.With(x=>x.Id, Guid.NewGuid())
@@ -115,7 +115,7 @@ public class UnitServicesTests
         // Arrange
         _validatorMock
                 .Setup(x => x.Validate(It.IsAny<InclusaoContaCommand>()))
-                .Returns(new ValidationResult(new[] { new ValidationFailure("any-prop", "any-error-message") }));
+                .Returns(new FluentValidation.Results.ValidationResult(new[] { new ValidationFailure("any-prop", "any-error-message") }));
 
         // Act
         var service = await _contaService.CriarConta(_request);
@@ -126,4 +126,94 @@ public class UnitServicesTests
         //_validatorMock.VerifyNoOtherCalls();
 
     }
+}
+
+public class ContasControllerTests
+{
+    private readonly ConsultaFinanceiraContext _context;
+    private readonly ContasController _controller;
+
+    public ContasControllerTests()
+    {
+        _context = new ConsultaFinanceiraContext("mongodb://localhost:27017", "ConsultaFinanceira");
+
+        _controller = new ContasController(_context);
+    }
+    [Fact]
+    public async Task GetSaldo_DeveRetornarSaldoCorreto()
+    {
+        // Arrange
+        var conta = new Conta
+        {
+            Id = 1,
+            Numero = "123456",
+            Saldo = 1000.00m,
+            Titular = "João Silva",
+            Transacoes = new List<Transacao>()
+        };
+
+        await _context.Contas.InsertOneAsync(conta);
+
+        // Act
+        using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        var result = await _controller.GetSaldo(1, tokenSource.Token);
+
+        // Assert
+        result.Should().BeSuccess();
+
+        var saldo = (decimal)result.Value;
+
+        saldo.Should().Be(1000.00m);
+    }
+
+    [Fact]
+    public async Task GetExtrato_DeveRetornarExtratoCorreto()
+    {
+        // Arrange
+        var conta = new Conta
+        {
+            Id = 1,
+            Numero = "123456",
+            Saldo = 1000.00m,
+            Titular = "João Silva",
+            Transacoes = new List<Transacao>()
+        };
+
+        var transacao1 = new Transacao
+        {
+            Id = 1,
+            Data = DateTime.Now,
+            Valor = 100.00m,
+            Tipo = "Debito",
+            Descricao = "Compra na loja X"
+        };
+
+        var transacao2 = new Transacao
+        {
+            Id = 2,
+            Data = DateTime.Now.AddDays(-1),
+            Valor = 50.00m,
+            Tipo = "Credito",
+            Descricao = "Transferência recebida"
+        };
+
+        conta.Transacoes.Add(transacao1);
+        conta.Transacoes.Add(transacao2);
+
+        await _context.Contas.InsertOneAsync(conta);
+
+        // Act
+        using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        var result = await _controller.GetExtrato(1, tokenSource.Token);
+
+        // Assert
+        result.Should().BeSuccess();
+
+        var extrato = result.Value;
+
+        extrato.Should().HaveCount(2);
+        extrato.Should().Contain(transacao1);
+        extrato.Should().Contain(transacao2);
+    }
+
 }
