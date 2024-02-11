@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using MongoDB.Driver;
 
 namespace CourseTDD.Api;
 
@@ -12,6 +13,13 @@ public static class PagamentoController
 
     public static IServiceCollection AddDependencies(this IServiceCollection services)
     {
+        var settings = new
+        {
+            MongoClient = "mongodb://root:example@localhost:27017/",
+            Database = "sales"
+        };
+        var mongoClient = new MongoClient(settings.MongoClient);
+        services.AddSingleton(mongoClient.GetDatabase(settings.Database));
         services.AddScoped<IContaService, ContaService>();
         services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
         return services;
@@ -31,8 +39,22 @@ public static class PagamentoController
 }
 public class Conta
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
+    public required string Numero { get; set; }
+    public decimal Saldo { get; set; }
+    public required string Titular { get; set; }
+    public required List<Transacao> Transacoes { get; set; }
 }
+
+public class Transacao
+{
+    public int Id { get; set; }
+    public DateTime Data { get; set; }
+    public decimal Valor { get; set; }
+    public required string Tipo { get; set; }
+    public required string Descricao { get; set; }
+}
+
 public record InclusaoContaCommand(string Nome);
 public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaCommand>
 {
@@ -106,3 +128,56 @@ public class ContaService : IContaService
         return Task.FromResult(Result.Ok());
     }
 }
+
+public interface IMongoContext
+{
+    public IMongoCollection<Conta> Contas { get; }
+}
+public class ConsultaFinanceiraContext : IMongoContext
+{
+    private readonly IMongoClient _client;
+    private readonly IMongoDatabase _database;
+
+    public ConsultaFinanceiraContext(string connectionString, string databaseName)
+    {
+        _client = new MongoClient(connectionString);
+        _database = _client.GetDatabase(databaseName);
+    }
+
+    public IMongoCollection<Conta> Contas => _database.GetCollection<Conta>("contas");
+    public IMongoCollection<Transacao> Transacoes => _database.GetCollection<Transacao>("transacoes");
+}
+
+
+public class ContasController : ControllerBase
+{
+    private readonly ConsultaFinanceiraContext _context;
+
+    public ContasController(ConsultaFinanceiraContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet("{id}/saldo")]
+    public async Task<Result<decimal>> GetSaldo(int id, CancellationToken cancellationToken)
+    {
+        var filter = Builders<Conta>.Filter.Eq(x => x.Id, id);
+        var conta = await _context.Contas
+            .Find(filter)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return conta == null ? Result.Fail("Não encontrado") : Result.Ok(conta.Saldo);
+    }
+
+    [HttpGet("{id}/extrato")]
+    public async Task<Result<List<Transacao>>> GetExtrato(int id, CancellationToken cancellationToken)
+    {
+        var filter = Builders<Conta>.Filter.Eq(x => x.Id, id);
+        var conta = await _context.Contas
+        .Find(filter)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return conta.Transacoes.Any() ? Result.Fail("Não encontrado") : Result.Ok(conta.Transacoes);
+    }
+}
+

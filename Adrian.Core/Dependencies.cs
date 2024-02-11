@@ -7,7 +7,6 @@ using Adrian.Core.Repositories.Persistences;
 using Adrian.Core.Repositories.Readers;
 using Adrian.Core.Settings;
 using MassTransit;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
