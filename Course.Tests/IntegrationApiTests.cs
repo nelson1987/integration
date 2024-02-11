@@ -185,7 +185,7 @@ public class ContasControllerTests : IAsyncLifetime
         var transacao1 = new Transacao
         {
             Id = 1,
-            Data = DateTime.Now,
+            Data = DateTime.Today,
             Valor = 100.00m,
             Tipo = "Debito",
             Descricao = "Compra na loja X"
@@ -194,7 +194,7 @@ public class ContasControllerTests : IAsyncLifetime
         var transacao2 = new Transacao
         {
             Id = 2,
-            Data = DateTime.Now.AddDays(-1),
+            Data = DateTime.Today.AddDays(-1),
             Valor = 50.00m,
             Tipo = "Credito",
             Descricao = "Transferência recebida"
