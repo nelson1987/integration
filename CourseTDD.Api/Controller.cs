@@ -177,7 +177,7 @@ public class ContasController : ControllerBase
         .Find(filter)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return conta.Transacoes.Any() ? Result.Fail("Não encontrado") : Result.Ok(conta.Transacoes);
+        return conta.Transacoes.Any() ? Result.Ok(conta.Transacoes) : Result.Fail("Não encontrado");
     }
 }
 
