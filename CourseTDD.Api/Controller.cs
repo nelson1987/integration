@@ -20,7 +20,104 @@ public class ContaCriadaConsumer : IConsumer<ContaCriadaEvent>
     public Task Consume(ConsumeContext<ContaCriadaEvent> context)
     {
         _logger.LogInformation($"Consumido: {context.Message}");
+        var messageId = context.Headers.Get<Guid>("MessageId");
         return Task.CompletedTask;
+    }
+}
+//public class BusObserver : IBusObserver
+//{
+//    public void CreateFaulted(Exception exception)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public void PostCreate(IBus bus)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public Task PostStart(IBus bus, Task<BusReady> busReady)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public Task PostStop(IBus bus)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public Task PreStart(IBus bus)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public Task PreStop(IBus bus)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public Task StartFaulted(IBus bus, Exception exception)
+//    {
+//        throw new NotImplementedException();
+//    }
+
+//    public Task StopFaulted(IBus bus, Exception exception)
+//    {
+//        throw new NotImplementedException();
+//    }
+//}
+public class SendObserver : ISendObserver
+{
+    private readonly ILogger<ConsumeObserver> _logger;
+
+    public SendObserver(ILogger<ConsumeObserver> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task PostSend<T>(SendContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PostSend(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task PreSend<T>(SendContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PreSend(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task SendFault<T>(SendContext<T> context, Exception exception) where T : class
+    {
+        _logger.LogInformation($"SendFault(): {context}");
+        await Task.CompletedTask;
+    }
+}
+public class ConsumeObserver : IConsumeObserver
+{
+    private readonly ILogger<ConsumeObserver> _logger;
+
+    public ConsumeObserver(ILogger<ConsumeObserver> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception) where T : class
+    {
+        _logger.LogInformation($"ConsumeFault(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task PostConsume<T>(ConsumeContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PostConsume(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task PreConsume<T>(ConsumeContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PreConsume(): {context}");
+        await Task.CompletedTask;
     }
 }
 public static class PagamentoController
@@ -36,6 +133,10 @@ public static class PagamentoController
         };
         var mongoClient = new MongoClient(settings.MongoClient);
         services.AddSingleton(mongoClient.GetDatabase(settings.Database));
+        //services.AddBusObserver<BusObserver>();
+        services.AddConsumeObserver<ConsumeObserver>();
+        services.AddSendObserver<SendObserver>();
+
 
         services.AddScoped<IContaService, ContaService>();
         services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
@@ -157,6 +258,7 @@ public class ContaService : IContaService
             return await Task.FromResult(paginationHeaderValidation.ToFailResult());
 
         await _bus.Send(new ContaCriadaEvent(Guid.NewGuid(), Guid.NewGuid().ToString()));
+
         //Conta entity = new Conta();
         //return Task.FromResult(Results.Created($"/{entity.Id}", entity));
         return await Task.FromResult(Result.Ok());
