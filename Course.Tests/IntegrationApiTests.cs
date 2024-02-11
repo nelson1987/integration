@@ -1,4 +1,15 @@
-﻿namespace Course.Tests;
+﻿using AutoFixture;
+using AutoFixture.AutoMoq;
+using CourseTDD.Api;
+using FluentAssertions;
+using FluentResults.Extensions.FluentAssertions;
+using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.TestHelper;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Moq;
+
+namespace Course.Tests;
 
 public class IntegrationApiTests : IClassFixture<WebApplicationFactory<Program>>
 {
