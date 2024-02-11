@@ -1,12 +1,4 @@
-﻿using FluentResults;
-using FluentValidation;
-using FluentValidation.Results;
-using MassTransit;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MongoDB.Driver;
-
-namespace CourseTDD.Api;
+﻿namespace CourseTDD.Api;
 public record ContaCriadaEvent(Guid Id, string Nome);
 public class ContaCriadaConsumer : IConsumer<ContaCriadaEvent>
 {
