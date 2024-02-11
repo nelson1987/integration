@@ -217,9 +217,9 @@ public class ContasControllerTests : IAsyncLifetime
         extrato.Should().Contain(transacao2);
     }
 
-    public Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        throw new NotImplementedException();
+        await Task.CompletedTask;
     }
 
     public async Task DisposeAsync()
