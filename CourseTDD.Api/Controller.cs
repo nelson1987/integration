@@ -39,7 +39,7 @@ public static class PagamentoController
 }
 public class Conta
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public required string Numero { get; set; }
     public decimal Saldo { get; set; }
     public required string Titular { get; set; }
@@ -159,7 +159,7 @@ public class ContasController : ControllerBase
     }
 
     [HttpGet("{id}/saldo")]
-    public async Task<Result<decimal>> GetSaldo(int id, CancellationToken cancellationToken)
+    public async Task<Result<decimal>> GetSaldo(Guid id, CancellationToken cancellationToken)
     {
         var filter = Builders<Conta>.Filter.Eq(x => x.Id, id);
         var conta = await _context.Contas
@@ -170,7 +170,7 @@ public class ContasController : ControllerBase
     }
 
     [HttpGet("{id}/extrato")]
-    public async Task<Result<List<Transacao>>> GetExtrato(int id, CancellationToken cancellationToken)
+    public async Task<Result<List<Transacao>>> GetExtrato(Guid id, CancellationToken cancellationToken)
     {
         var filter = Builders<Conta>.Filter.Eq(x => x.Id, id);
         var conta = await _context.Contas

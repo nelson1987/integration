@@ -143,10 +143,11 @@ public class ContasControllerTests : IAsyncLifetime
     [Fact]
     public async Task GetSaldo_DeveRetornarSaldoCorreto()
     {
+        var id = Guid.NewGuid();
         // Arrange
         var conta = new Conta
         {
-            Id = 1,
+            Id = id,
             Numero = "123456",
             Saldo = 1000.00m,
             Titular = "João Silva",
@@ -157,7 +158,7 @@ public class ContasControllerTests : IAsyncLifetime
 
         // Act
         using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
-        var result = await _controller.GetSaldo(1, tokenSource.Token);
+        var result = await _controller.GetSaldo(id, tokenSource.Token);
 
         // Assert
         result.Should().BeSuccess();
@@ -171,9 +172,10 @@ public class ContasControllerTests : IAsyncLifetime
     public async Task GetExtrato_DeveRetornarExtratoCorreto()
     {
         // Arrange
+        var id = Guid.NewGuid();
         var conta = new Conta
         {
-            Id = 1,
+            Id = id,
             Numero = "123456",
             Saldo = 1000.00m,
             Titular = "João Silva",
@@ -205,7 +207,7 @@ public class ContasControllerTests : IAsyncLifetime
 
         // Act
         using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
-        var result = await _controller.GetExtrato(1, tokenSource.Token);
+        var result = await _controller.GetExtrato(id, tokenSource.Token);
 
         // Assert
         result.Should().BeSuccess();
@@ -225,7 +227,11 @@ public class ContasControllerTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
-        var filter = Builders<Conta>.Filter.Eq(x => x.Id, 1);
+        var filter = Builders<Conta>.Filter.Eq(x => x.Titular, "João Silva");
         await _context.Contas.DeleteManyAsync(filter, tokenSource.Token);
+        var transacaoFilter = Builders<Transacao>.Filter.Eq(x => x.Tipo, "Credito");
+        await _context.Transacoes.DeleteManyAsync(transacaoFilter, tokenSource.Token);
+        var transacaoFilter2 = Builders<Transacao>.Filter.Eq(x => x.Tipo, "Debito");
+        await _context.Transacoes.DeleteManyAsync(transacaoFilter2, tokenSource.Token);
     }
 }
