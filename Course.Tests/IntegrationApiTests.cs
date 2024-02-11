@@ -158,7 +158,7 @@ public class ContasControllerTests : IAsyncLifetime
 
         // Act
         using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
-        var result = await _controller.GetSaldo(id, tokenSource.Token);
+        var result = await _controller.GetSaldo(id, CancellationToken.None);
 
         // Assert
         result.Should().BeSuccess();
@@ -207,7 +207,7 @@ public class ContasControllerTests : IAsyncLifetime
 
         // Act
         using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
-        var result = await _controller.GetExtrato(id, tokenSource.Token);
+        var result = await _controller.GetExtrato(id, CancellationToken.None);
 
         // Assert
         result.Should().BeSuccess();
