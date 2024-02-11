@@ -7,6 +7,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.TestHelper;
 using Microsoft.AspNetCore.Mvc.Testing;
+using MongoDB.Driver;
 using Moq;
 
 namespace Course.Tests;
@@ -128,7 +129,7 @@ public class UnitServicesTests
     }
 }
 
-public class ContasControllerTests
+public class ContasControllerTests : IAsyncLifetime
 {
     private readonly ConsultaFinanceiraContext _context;
     private readonly ContasController _controller;
@@ -216,4 +217,15 @@ public class ContasControllerTests
         extrato.Should().Contain(transacao2);
     }
 
+    public Task InitializeAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task DisposeAsync()
+    {
+        using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        var filter = Builders<Conta>.Filter.Eq(x => x.Id, 1);
+        await _context.Contas.DeleteManyAsync(filter, tokenSource.Token);
+    }
 }
