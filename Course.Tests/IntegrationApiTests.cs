@@ -226,12 +226,16 @@ public class ContasControllerTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
         var filter = Builders<Conta>.Filter.Eq(x => x.Titular, "João Silva");
+        using var tokenSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
         await _context.Contas.DeleteManyAsync(filter, tokenSource.Token);
+
         var transacaoFilter = Builders<Transacao>.Filter.Eq(x => x.Tipo, "Credito");
-        await _context.Transacoes.DeleteManyAsync(transacaoFilter, tokenSource.Token);
+        using var tokenSource2 = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        await _context.Transacoes.DeleteManyAsync(transacaoFilter, tokenSource2.Token);
+
         var transacaoFilter2 = Builders<Transacao>.Filter.Eq(x => x.Tipo, "Debito");
-        await _context.Transacoes.DeleteManyAsync(transacaoFilter2, tokenSource.Token);
+        using var tokenSource3 = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        await _context.Transacoes.DeleteManyAsync(transacaoFilter2, tokenSource3.Token);
     }
 }
