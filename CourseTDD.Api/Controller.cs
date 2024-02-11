@@ -1,12 +1,28 @@
 ﻿using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MongoDB.Driver;
 
 namespace CourseTDD.Api;
+public record ContaCriadaEvent(Guid Id, string Nome);
+public class ContaCriadaConsumer : IConsumer<ContaCriadaEvent>
+{
+    private readonly ILogger<ContaCriadaConsumer> _logger;
 
+    public ContaCriadaConsumer(ILogger<ContaCriadaConsumer> logger)
+    {
+        _logger = logger;
+    }
+
+    public Task Consume(ConsumeContext<ContaCriadaEvent> context)
+    {
+        _logger.LogInformation($"Consumido: {context.Message}");
+        return Task.CompletedTask;
+    }
+}
 public static class PagamentoController
 {
     public enum FormaPagamento { CartaoCredito = 1 }
@@ -20,8 +36,22 @@ public static class PagamentoController
         };
         var mongoClient = new MongoClient(settings.MongoClient);
         services.AddSingleton(mongoClient.GetDatabase(settings.Database));
+
         services.AddScoped<IContaService, ContaService>();
         services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
+
+
+        services.AddMassTransit(x =>
+        {
+            x.SetKebabCaseEndpointNameFormatter();
+            x.AddConsumer<ContaCriadaConsumer>();
+            x.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host("amqp://guest:guest@localhost:5672");
+                cfg.ConfigureEndpoints(ctx);
+                //cfg.UseRawJsonSerializer();
+            });
+        });
         return services;
     }
 
@@ -39,6 +69,7 @@ public static class PagamentoController
 }
 public class Conta
 {
+
     public Guid Id { get; set; }
     public required string Numero { get; set; }
     public decimal Saldo { get; set; }
@@ -65,9 +96,9 @@ public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaComm
 }
 public static class FluentValidationExtensions
 {
-    public static bool IsInvalid(this ValidationResult result) => !result.IsValid;
+    public static bool IsInvalid(this FluentValidation.Results.ValidationResult result) => !result.IsValid;
 
-    public static ModelStateDictionary ToModelState(this ValidationResult result)
+    public static ModelStateDictionary ToModelState(this FluentValidation.Results.ValidationResult result)
     {
         var modelState = new ModelStateDictionary();
 
@@ -89,7 +120,7 @@ public static class FluentResultsExtensions
     public record Error(string Message, IDictionary<string, object>? Metadata);
     public record ErrorResponse(Error[] Errors);
 
-    public static Result ToFailResult(this ValidationResult validationResult)
+    public static Result ToFailResult(this FluentValidation.Results.ValidationResult validationResult)
     {
         var errors = validationResult.Errors.Select(x => new FluentResults.Error(x.ErrorMessage)
             .WithMetadata(nameof(x.PropertyName), x.PropertyName)
@@ -109,23 +140,26 @@ public interface IContaService
 }
 public class ContaService : IContaService
 {
+    private readonly IBus _bus;
     private readonly IValidator<InclusaoContaCommand> _validator;
 
-    public ContaService(IValidator<InclusaoContaCommand> validator)
+    public ContaService(IValidator<InclusaoContaCommand> validator, IBus bus)
     {
         _validator = validator;
+        _bus = bus;
     }
 
     //private readonly IValidator<InclusaoContaCommand> _validator;
-    public Task<Result> CriarConta(InclusaoContaCommand command)
+    public async Task<Result> CriarConta(InclusaoContaCommand command)
     {
         var paginationHeaderValidation = _validator.Validate(command);
         if (!paginationHeaderValidation.IsValid)
-            return Task.FromResult(paginationHeaderValidation.ToFailResult());
+            return await Task.FromResult(paginationHeaderValidation.ToFailResult());
 
+        await _bus.Send(new ContaCriadaEvent(Guid.NewGuid(), Guid.NewGuid().ToString());
         //Conta entity = new Conta();
         //return Task.FromResult(Results.Created($"/{entity.Id}", entity));
-        return Task.FromResult(Result.Ok());
+        return await Task.FromResult(Result.Ok());
     }
 }
 
