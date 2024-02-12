@@ -101,9 +101,9 @@ public class ContaControllerUnitTests
     public async Task Dado_Produtor_Com_Erro_Resultado_FalhaAsync()
     {
         //Arrange
-        _producer
-             .Setup(x => x.Send(It.IsAny<ContaIncluidaEvent>(), _token))
-             .Returns(Task.FromResult(new NotImplementedException()));
+        //_producer
+        //     .Setup(x => x.Send(It.IsAny<ContaIncluidaEvent>(), _token))
+        //     .Returns(Task.FromResult(new NotImplementedException()));
         //Act
         var response = await _controller.Post(_request, _token);
         //Assert

@@ -5,6 +5,7 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MongoDB.Driver;
+using MassTransit;
 
 namespace Integration.Api.Controllers;
 #region Dependencies
@@ -13,7 +14,7 @@ public static class Dependencies
     public static IServiceCollection AddCore(this IServiceCollection services)
     {
         //services.AddScoped<IMongoContext, ConsultaFinanceiraContext>();
-        services.AddMongoDb();
+        //services.AddMongoDb();
         services.AddRabbitMq();
         services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
 
@@ -22,19 +23,19 @@ public static class Dependencies
 
     private static IServiceCollection AddRabbitMq(this IServiceCollection services)
     {
-        //services.AddMassTransit(x =>
-        //{
+        services.AddMassTransit(x =>
+        {
         //    x.AddConsumeObserver<ConsumeObserver>();
         //    x.AddSendObserver<SendObserver>();
-        //    x.SetKebabCaseEndpointNameFormatter();
+            x.SetKebabCaseEndpointNameFormatter();
         //    x.AddConsumer<ContaCriadaConsumer>();
-        //    x.UsingRabbitMq((ctx, cfg) =>
-        //    {
-        //        cfg.Host("amqp://guest:guest@localhost:5672");
-        //        cfg.ConfigureEndpoints(ctx);
-        //        //cfg.UseRawJsonSerializer();
-        //    });
-        //});
+            x.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host("amqp://guest:guest@localhost:5672");
+                cfg.ConfigureEndpoints(ctx);
+                //cfg.UseRawJsonSerializer();
+            });
+        });
         return services;
     }
     private static IServiceCollection AddMongoDb(this IServiceCollection services)
@@ -79,6 +80,19 @@ public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaComm
 public interface IProducer
 {
     Task Send(ContaIncluidaEvent @event, CancellationToken cancellationToken);
+}
+public class ContaProducer : IProducer
+{
+    private readonly IBus _bus;
+
+    public ContaProducer(IBus bus)
+    {
+        _bus = bus;
+    }
+    public async Task Send(ContaIncluidaEvent @event, CancellationToken cancellationToken)
+    {
+        await _bus.Send(@event);
+    }
 }
 public record ContaIncluidaEvent
 {
