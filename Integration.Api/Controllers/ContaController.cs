@@ -2,10 +2,10 @@ using AutoMapper;
 using FluentResults;
 using FluentValidation;
 using FluentValidation.Results;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MongoDB.Driver;
-using MassTransit;
 
 namespace Integration.Api.Controllers;
 #region Dependencies
@@ -17,7 +17,7 @@ public static class Dependencies
         //services.AddMongoDb();
         services.AddRabbitMq();
         services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
-
+        services.AddScoped<IProducer<ContaIncluidaEvent>, ContaApiEventsProducer>();
         return services;
     }
 
@@ -25,10 +25,10 @@ public static class Dependencies
     {
         services.AddMassTransit(x =>
         {
-        //    x.AddConsumeObserver<ConsumeObserver>();
-        //    x.AddSendObserver<SendObserver>();
+            //    x.AddConsumeObserver<ConsumeObserver>();
+            //    x.AddSendObserver<SendObserver>();
             x.SetKebabCaseEndpointNameFormatter();
-        //    x.AddConsumer<ContaCriadaConsumer>();
+            //    x.AddConsumer<ContaCriadaConsumer>();
             x.UsingRabbitMq((ctx, cfg) =>
             {
                 cfg.Host("amqp://guest:guest@localhost:5672");
@@ -77,21 +77,34 @@ public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaComm
         RuleFor(x => x.NumeroContaDebitada).NotEmpty();
     }
 }
-public interface IProducer
+public interface IProducer<TEvent> where TEvent : class
 {
-    Task Send(ContaIncluidaEvent @event, CancellationToken cancellationToken);
+    Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken);
 }
-public class ContaProducer : IProducer
+public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
 {
-    private readonly IBus _bus;
+    private readonly IBus _producer;
+    private readonly ILogger<Producer<TEvent>> _logger;
 
-    public ContaProducer(IBus bus)
+    public Producer(IBus producer, ILogger<Producer<TEvent>> logger)
     {
-        _bus = bus;
+        _producer = producer;
+        _logger = logger;
     }
-    public async Task Send(ContaIncluidaEvent @event, CancellationToken cancellationToken)
+
+    public async Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken)
     {
-        await _bus.Send(@event);
+        _logger.LogInformation($"Mensagem a ser produzida {nameof(@event)}.");
+        await _producer.Publish(@event, cancellationToken);
+        _logger.LogInformation($"Mensagem produzida {nameof(@event)}.");
+        return Result.Ok();
+
+    }
+}
+public class ContaApiEventsProducer : Producer<ContaIncluidaEvent>
+{
+    public ContaApiEventsProducer(IBus producer, ILogger<Producer<ContaIncluidaEvent>> logger) : base(producer, logger)
+    {
     }
 }
 public record ContaIncluidaEvent
@@ -203,13 +216,15 @@ public class ContaController : ControllerBase
 {
     private readonly ILogger<ContaController> _logger;
     private readonly IValidator<InclusaoContaCommand> _validator;
-    private readonly IProducer _producer;
-    private readonly IDataReader _dataReader;
-    public ContaController(ILogger<ContaController> logger, IProducer producer, IDataReader dataWrite, IValidator<InclusaoContaCommand> validator)
+    private readonly IProducer<ContaIncluidaEvent> _producer;
+    //private readonly IDataReader _dataReader;
+    public ContaController(ILogger<ContaController> logger, IProducer<ContaIncluidaEvent> producer,
+    //IDataReader dataWrite, 
+    IValidator<InclusaoContaCommand> validator)
     {
         _logger = logger;
         _producer = producer;
-        _dataReader = dataWrite;
+        //_dataReader = dataWrite;
         _validator = validator;
     }
 
@@ -222,9 +237,9 @@ public class ContaController : ControllerBase
         try
         {
             Conta entity = command.MapTo<Conta>();
-            await _dataReader.Insert(entity, cancellationToken);
+            //await _dataReader.Insert(entity, cancellationToken);
             ContaIncluidaEvent @event = entity.MapTo<ContaIncluidaEvent>();
-            await _producer.Send(@event, cancellationToken);
+            await _producer.SendAsync(@event, cancellationToken);
 
             return Result.Ok();
         }
@@ -233,5 +248,23 @@ public class ContaController : ControllerBase
             return Result.Fail(ex.Message);
         }
     }
+}
+public class ContaIncluidaEventConsumer : IConsumer<ContaIncluidaEvent>
+{
+    private readonly ILogger<ContaIncluidaEventConsumer> _logger;
+
+    public ContaIncluidaEventConsumer(ILogger<ContaIncluidaEventConsumer> logger)
+    {
+        _logger = logger;
+    }
+
+    public Task Consume(ConsumeContext<ContaIncluidaEvent> context)
+    {
+        _logger.LogInformation($"Mensagem a ser produzida {nameof(context)}.");
+        ContaIncluidaEvent @event = context.Message;
+        _logger.LogInformation($"Mensagem produzida {nameof(context)}.");
+        return Task.CompletedTask;
+    }
+
 }
 #endregion

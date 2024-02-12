@@ -1,4 +1,6 @@
 
+using Integration.Api.Controllers;
+
 namespace Integration.Api;
 
 public class Program
@@ -13,7 +15,7 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
+        builder.Services.AddCore();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
