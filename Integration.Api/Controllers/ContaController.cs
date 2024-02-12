@@ -17,7 +17,7 @@ public static class Dependencies
         //services.AddMongoDb();
         services.AddRabbitMq();
         services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
-
+        services.AddScoped<IProducer<ContaIncluidaEvent>, ContaApiEventsProducer>();
         return services;
     }
 
@@ -77,21 +77,34 @@ public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaComm
         RuleFor(x => x.NumeroContaDebitada).NotEmpty();
     }
 }
-public interface IProducer
+public interface IProducer<TEvent> where TEvent : class
 {
-    Task Send(ContaIncluidaEvent @event, CancellationToken cancellationToken);
+    Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken);
 }
-public class ContaProducer : IProducer
+public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
 {
-    private readonly IBus _bus;
+    private readonly IBus _producer;
+    private readonly ILogger<Producer<TEvent>> _logger;
 
-    public ContaProducer(IBus bus)
+    public Producer(IBus producer, ILogger<Producer<TEvent>> logger)
     {
-        _bus = bus;
+        _producer = producer;
+        _logger = logger;
     }
-    public async Task Send(ContaIncluidaEvent @event, CancellationToken cancellationToken)
+
+    public async Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken)
     {
-        await _bus.Send(@event);
+        _logger.LogInformation($"Mensagem a ser produzida {nameof(@event)}.");
+        await _producer.Publish(@event, cancellationToken);
+        _logger.LogInformation($"Mensagem produzida {nameof(@event)}.");
+        return Result.Ok();
+
+    }
+}
+public class ContaApiEventsProducer : Producer<ContaIncluidaEvent>
+{
+    public ContaApiEventsProducer(IBus producer, ILogger<Producer<ContaIncluidaEvent>> logger) : base(producer, logger)
+    {
     }
 }
 public record ContaIncluidaEvent
@@ -203,13 +216,15 @@ public class ContaController : ControllerBase
 {
     private readonly ILogger<ContaController> _logger;
     private readonly IValidator<InclusaoContaCommand> _validator;
-    private readonly IProducer _producer;
-    private readonly IDataReader _dataReader;
-    public ContaController(ILogger<ContaController> logger, IProducer producer, IDataReader dataWrite, IValidator<InclusaoContaCommand> validator)
+    private readonly IProducer<ContaIncluidaEvent> _producer;
+    //private readonly IDataReader _dataReader;
+    public ContaController(ILogger<ContaController> logger, IProducer<ContaIncluidaEvent> producer, 
+    //IDataReader dataWrite, 
+    IValidator<InclusaoContaCommand> validator)
     {
         _logger = logger;
         _producer = producer;
-        _dataReader = dataWrite;
+        //_dataReader = dataWrite;
         _validator = validator;
     }
 
@@ -222,9 +237,9 @@ public class ContaController : ControllerBase
         try
         {
             Conta entity = command.MapTo<Conta>();
-            await _dataReader.Insert(entity, cancellationToken);
+            //await _dataReader.Insert(entity, cancellationToken);
             ContaIncluidaEvent @event = entity.MapTo<ContaIncluidaEvent>();
-            await _producer.Send(@event, cancellationToken);
+            await _producer.SendAsync(@event, cancellationToken);
 
             return Result.Ok();
         }
@@ -234,4 +249,5 @@ public class ContaController : ControllerBase
         }
     }
 }
+public class ContaIncluidaEventConsumer : IConsumer<ContaIncluidaEvent>{}
 #endregion
