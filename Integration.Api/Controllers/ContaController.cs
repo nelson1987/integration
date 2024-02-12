@@ -26,8 +26,8 @@ public static class Dependencies
         services.AddMassTransit(x =>
         {
             x.AddConsumeObserver<ConsumeObserver>();
-            x.AddSendObserver<SendObserver>();
-            
+            x.AddPublishObserver<SendObserver>();
+
             x.SetKebabCaseEndpointNameFormatter();
             x.AddConsumer<ContaIncluidaEventConsumer>();
             x.UsingRabbitMq((ctx, cfg) =>
@@ -54,7 +54,7 @@ public static class Dependencies
 #endregion
 
 #region Core
-public class SendObserver : ISendObserver
+public class SendObserver : IPublishObserver
 {
     private readonly ILogger<SendObserver> _logger;
 
@@ -63,21 +63,21 @@ public class SendObserver : ISendObserver
         _logger = logger;
     }
 
-    public async Task PostSend<T>(SendContext<T> context) where T : class
+    public async Task PostPublish<T>(PublishContext<T> context) where T : class
     {
         _logger.LogInformation($"PostSend(): {context}");
         await Task.CompletedTask;
     }
 
-    public async Task PreSend<T>(SendContext<T> context) where T : class
+    public async Task PrePublish<T>(PublishContext<T> context) where T : class
     {
         _logger.LogInformation($"PreSend(): {context}");
         await Task.CompletedTask;
     }
 
-    public async Task SendFault<T>(SendContext<T> context, Exception exception) where T : class
+    public async Task PublishFault<T>(PublishContext<T> context, Exception exception) where T : class
     {
-        _logger.LogInformation($"SendFault(): {context}");
+        _logger.LogInformation($"PublishFault(): {context}");
         await Task.CompletedTask;
     }
 }
