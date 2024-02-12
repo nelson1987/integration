@@ -26,7 +26,7 @@ public static class Dependencies
         services.AddMassTransit(x =>
         {
             x.AddConsumeObserver<ConsumeObserver>();
-            x.AddPublishObserver<SendObserver>();
+            x.AddPublishObserver<PublishObserver>();
 
             x.SetKebabCaseEndpointNameFormatter();
             x.AddConsumer<ContaIncluidaEventConsumer>();
@@ -54,24 +54,24 @@ public static class Dependencies
 #endregion
 
 #region Core
-public class SendObserver : IPublishObserver
+public class PublishObserver : IPublishObserver
 {
-    private readonly ILogger<SendObserver> _logger;
+    private readonly ILogger<PublishObserver> _logger;
 
-    public SendObserver(ILogger<SendObserver> logger)
+    public PublishObserver(ILogger<PublishObserver> logger)
     {
         _logger = logger;
     }
 
     public async Task PostPublish<T>(PublishContext<T> context) where T : class
     {
-        _logger.LogInformation($"PostSend(): {context}");
+        _logger.LogInformation($"PostPublish(): {context}");
         await Task.CompletedTask;
     }
 
     public async Task PrePublish<T>(PublishContext<T> context) where T : class
     {
-        _logger.LogInformation($"PreSend(): {context}");
+        _logger.LogInformation($"PrePublish(): {context}");
         await Task.CompletedTask;
     }
 
