@@ -17,7 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Course.Tests", "Course.Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "course", "course", "{56F0316D-7340-4837-A0DF-779C6724C64B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseTDD.Api", "CourseTDD.Api\CourseTDD.Api.csproj", "{9E30F4FE-40A1-4B60-B9C2-75A49E3070CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CourseTDD.Api", "CourseTDD.Api\CourseTDD.Api.csproj", "{9E30F4FE-40A1-4B60-B9C2-75A49E3070CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Integration.Tests", "Integration.Tests\Integration.Tests.csproj", "{8E745B26-2CFB-436F-8A29-895BFA9EA151}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Integration.Api", "Integration.Api\Integration.Api.csproj", "{8074BD71-0AA6-499B-A650-8196B3C13808}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{9E30F4FE-40A1-4B60-B9C2-75A49E3070CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E30F4FE-40A1-4B60-B9C2-75A49E3070CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E30F4FE-40A1-4B60-B9C2-75A49E3070CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E745B26-2CFB-436F-8A29-895BFA9EA151}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E745B26-2CFB-436F-8A29-895BFA9EA151}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E745B26-2CFB-436F-8A29-895BFA9EA151}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E745B26-2CFB-436F-8A29-895BFA9EA151}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8074BD71-0AA6-499B-A650-8196B3C13808}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8074BD71-0AA6-499B-A650-8196B3C13808}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8074BD71-0AA6-499B-A650-8196B3C13808}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8074BD71-0AA6-499B-A650-8196B3C13808}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
