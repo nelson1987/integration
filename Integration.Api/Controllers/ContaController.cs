@@ -25,10 +25,11 @@ public static class Dependencies
     {
         services.AddMassTransit(x =>
         {
-            //    x.AddConsumeObserver<ConsumeObserver>();
-            //    x.AddSendObserver<SendObserver>();
+            x.AddConsumeObserver<ConsumeObserver>();
+            x.AddSendObserver<SendObserver>();
+            
             x.SetKebabCaseEndpointNameFormatter();
-            //    x.AddConsumer<ContaCriadaConsumer>();
+            x.AddConsumer<ContaIncluidaEventConsumer>();
             x.UsingRabbitMq((ctx, cfg) =>
             {
                 cfg.Host("amqp://guest:guest@localhost:5672");
@@ -53,6 +54,60 @@ public static class Dependencies
 #endregion
 
 #region Core
+public class SendObserver : ISendObserver
+{
+    private readonly ILogger<SendObserver> _logger;
+
+    public SendObserver(ILogger<SendObserver> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task PostSend<T>(SendContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PostSend(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task PreSend<T>(SendContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PreSend(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task SendFault<T>(SendContext<T> context, Exception exception) where T : class
+    {
+        _logger.LogInformation($"SendFault(): {context}");
+        await Task.CompletedTask;
+    }
+}
+public class ConsumeObserver : IConsumeObserver
+{
+    private readonly ILogger<ConsumeObserver> _logger;
+
+    public ConsumeObserver(ILogger<ConsumeObserver> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception) where T : class
+    {
+        _logger.LogInformation($"ConsumeFault(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task PostConsume<T>(ConsumeContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PostConsume(): {context}");
+        await Task.CompletedTask;
+    }
+
+    public async Task PreConsume<T>(ConsumeContext<T> context) where T : class
+    {
+        _logger.LogInformation($"PreConsume(): {context}");
+        await Task.CompletedTask;
+    }
+}
 public record InclusaoContaCommand
 {
     public required string NumeroContaDebitada { get; set; }
