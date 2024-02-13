@@ -1,6 +1,6 @@
-﻿using MassTransit;
+﻿using Integration.Core.Features.Events;
 
-namespace Integration.Api.Features;
+namespace Integration.Core.Features.Consumers;
 #region Controller
 public class ContaIncluidaEventConsumer : IConsumer<ContaIncluidaEvent>
 {
@@ -16,9 +16,9 @@ public class ContaIncluidaEventConsumer : IConsumer<ContaIncluidaEvent>
 
     public Task Consume(ConsumeContext<ContaIncluidaEvent> context)
     {
-        //_logger.LogInformation($"Mensagem a ser produzida {nameof(ContaIncluidaEvent)}.");
+        _logger.LogInformation($"Mensagem a ser produzida {nameof(ContaIncluidaEvent)}.");
         ContaIncluidaEvent @event = context.Message;
-        //_logger.LogInformation($"Mensagem produzida {nameof(ContaIncluidaEvent)}.");
+        _logger.LogInformation($"Mensagem produzida {nameof(ContaIncluidaEvent)}.");
         return Task.CompletedTask;
     }
 

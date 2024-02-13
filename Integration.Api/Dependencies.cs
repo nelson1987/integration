@@ -1,5 +1,13 @@
 ﻿using FluentValidation;
 using Integration.Api.Features;
+using Integration.Core.Features.Commands;
+using Integration.Core.Features.Consumers;
+using Integration.Core.Features.Entities;
+using Integration.Core.Features.Events;
+using Integration.Core.Features.Producers;
+using Integration.Core.Features.Validators;
+using Integration.Core.Repositories;
+using Integration.Core.Utils.Observers;
 using MassTransit;
 using MongoDB.Driver;
 

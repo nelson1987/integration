@@ -1,4 +1,4 @@
-﻿namespace Integration.Api.Features;
+﻿namespace Integration.Core.Features.Events;
 
 public record ContaIncluidaEvent
 {

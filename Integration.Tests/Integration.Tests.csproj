@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Integration.Api\Integration.Api.csproj" />
+    <ProjectReference Include="..\Integration.Core\Integration.Core.csproj" />
   </ItemGroup>
 
 </Project>

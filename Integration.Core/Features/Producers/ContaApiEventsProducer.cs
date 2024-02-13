@@ -1,6 +1,7 @@
-﻿using MassTransit;
+﻿using Integration.Api.Features;
+using Integration.Core.Features.Events;
 
-namespace Integration.Api.Features;
+namespace Integration.Core.Features.Producers;
 
 public class ContaApiEventsProducer : Producer<ContaIncluidaEvent>
 {

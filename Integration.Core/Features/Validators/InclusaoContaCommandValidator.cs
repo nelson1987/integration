@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
+using Integration.Core.Features.Commands;
 
-namespace Integration.Api.Features;
+namespace Integration.Core.Features.Validators;
 
 public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaCommand>
 {

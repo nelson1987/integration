@@ -1,6 +1,9 @@
 using FluentResults;
 using FluentValidation;
 using Integration.Api.Features;
+using Integration.Core.Features.Commands;
+using Integration.Core.Features.Entities;
+using Integration.Core.Features.Events;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Integration.Api.Controllers;
@@ -15,8 +18,8 @@ public class ContaController : ControllerBase
     private readonly IDataReader<Conta> _dataReader;
     public ContaController(ILogger<ContaController> logger,
         IProducer<ContaIncluidaEvent> producer,
-    IDataReader<Conta> dataReader,
-    IValidator<InclusaoContaCommand> validator)
+        IDataReader<Conta> dataReader,
+        IValidator<InclusaoContaCommand> validator)
     {
         _logger = logger;
         _producer = producer;

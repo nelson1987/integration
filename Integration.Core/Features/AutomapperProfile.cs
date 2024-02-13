@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Integration.Core.Features.Commands;
+using Integration.Core.Features.Entities;
+using Integration.Core.Features.Events;
 
 namespace Integration.Api.Features;
 
