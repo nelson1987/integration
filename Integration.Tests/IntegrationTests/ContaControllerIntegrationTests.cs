@@ -1,0 +1,102 @@
+﻿using Integration.Api;
+using MassTransit;
+using MassTransit.Testing;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
+
+namespace Integration.Tests.IntegrationTests;
+public class ContaControllerIntegrationTests// : IAsyncLifetime
+{
+    /*
+    private readonly WebApplicationFactory<Program> _applicationFactory;
+
+    public ContaControllerIntegrationTests(WebApplicationFactory<Program> applicationFactory)
+    {
+        _applicationFactory = applicationFactory;
+    }
+
+    [Fact]
+    public async void Given_Valid_Request_Return_Success()
+    {
+        var httpClient = _applicationFactory.CreateClient();
+        var inclusaoConta = new InclusaoContaCommand(
+            Guid.NewGuid(),
+            "NomeTitular",
+            10.00M,
+            true,
+            TipoConta.Corrente);
+        var response = await httpClient.PostAsJsonAsync("/weatherforecast", inclusaoConta);
+
+        var contaInclusa = response.Content.ReadFromJsonAsync<InclusaoContaCommand>();
+
+        Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
+        Assert.NotNull(contaInclusa);
+        Assert.Equal(contaInclusa.Id, contaInclusa.Id);
+
+    }
+
+    [Fact]
+    public async void Given_Invalid_Request_Return_Fail()
+    {
+        var httpClient = _applicationFactory.CreateClient();
+        var inclusaoConta = new InclusaoContaCommand(
+            Guid.Empty,
+            "NomeTitular",
+            10.00M,
+            true,
+            TipoConta.Corrente);
+        var response = await httpClient.PostAsJsonAsync("/weatherforecast", inclusaoConta);
+
+        var contaInclusa = response.Content.ReadFromJsonAsync<InclusaoContaCommand>();
+
+        Assert.Equal(System.Net.HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        Assert.NotNull(contaInclusa);
+        Assert.Equal(contaInclusa.Id, contaInclusa.Id);
+
+    }
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    public Task InitializeAsync()
+    {
+        //Implementar Deletar =>
+        return Task.CompletedTask;
+    }
+
+
+
+    */
+
+    [Fact]
+    public async Task Should_have_the_submitted_status()
+    {
+
+        await using var application = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder => builder
+                .ConfigureServices(services =>
+                {
+                    services.AddMassTransitTestHarness();
+                    services.AddScoped<IValidator<InclusaoContaCommand>, InclusaoContaCommandValidator>();
+                    services.AddScoped<IProducer<ContaIncluidaEvent>, ContaApiEventsProducer>();
+                    services.AddScoped<IDataReader<Conta>, ContaDataReader>();
+                }));
+        var testHarness = application.Services.GetTestHarness();
+        using var client = application.CreateClient();
+        const string submitOrderUrl = "/weatherforecast";
+        var orderId = Guid.NewGuid();
+        var inclusaoConta = new InclusaoContaCommand(
+    orderId,
+    "NomeTitular",
+    10.00M,
+    true,
+    TipoConta.Corrente);
+        var submiteOrderResponse = await client.PostAsJsonAsync(submitOrderUrl, inclusaoConta);
+
+        submiteOrderResponse.EnsureSuccessStatusCode();
+        //var orderStatus = await submiteOrderResponse.Content.ReadFromJsonAsync<>();
+        var sagatestharness = testHarness.GetConsumerHarness<ContaIncluidaEventConsumer>();
+
+        Assert.True(await sagatestharness.Consumed.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
+
+    }
+}

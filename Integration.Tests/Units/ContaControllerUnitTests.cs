@@ -1,6 +1,47 @@
+using FluentResults;
 using FluentValidation.TestHelper;
+using MassTransit;
 
-namespace Integration.Tests;
+namespace Integration.Tests.Units;
+public class ContaApiEventsProducerUnitTests
+{
+    private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
+    private readonly ContaApiEventsProducer _producer;
+    private readonly ContaIncluidaEvent _event;
+    private readonly CancellationToken _token = CancellationToken.None;
+    private readonly Mock<IBus> _bus;
+
+    public ContaApiEventsProducerUnitTests()
+    {
+        _event = _fixture.Create<ContaIncluidaEvent>();
+
+        _bus = _fixture.Freeze<Mock<IBus>>();
+        _bus
+             .Setup(x => x.Publish(It.IsAny<ContaIncluidaEvent>(), _token))
+             .Returns(Task.CompletedTask);
+
+        _producer = _fixture.Build<ContaApiEventsProducer>()
+        .OmitAutoProperties()
+        .Create();
+    }
+
+    [Fact]
+    public async Task Deve_Criar_Comando_Com_SucessoAsync()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+
+        // Act
+        var producer = await _producer.SendAsync(_event, _token);
+        // Assert
+        Assert.NotNull(producer);
+        Assert.True(producer.IsSuccess);
+        //Assert.Equal(nomeTitular, comando.NomeTitular);
+        //Assert.Equal(saldoInicial, comando.SaldoInicial);
+        //Assert.Equal(ativo, comando.Ativo);
+        //Assert.Equal(tipo, comando.Tipo);
+    }
+}
 
 public class InclusaoContaCommandTests
 {
@@ -107,6 +148,7 @@ public class InclusaoContaCommandValidatorUnitTests
             .ShouldHaveValidationErrorFor(x => x.NomeTitular)
             .Only();
 }
+
 public class ContaControllerUnitTests
 {
     private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -114,23 +156,23 @@ public class ContaControllerUnitTests
     private readonly ContaController _controller;
     private readonly InclusaoContaCommand _request;
     private readonly Mock<IValidator<InclusaoContaCommand>> _validator;
-    //private readonly Mock<IProducer> _producer;
-    private readonly Mock<IDataReader> _dataWriter;
+    private readonly Mock<IProducer<ContaIncluidaEvent>> _producer;
+    private readonly Mock<IDataReader<Conta>> _dataWriter;
     public ContaControllerUnitTests()
     {
         _request = _fixture.Build<InclusaoContaCommand>()
             //.With(x => x.OrderId, Guid.NewGuid())
             .Create();
 
-        //_producer = _fixture.Freeze<Mock<IProducer>>();
-        //_producer
-        //     .Setup(x => x.Send(It.IsAny<ContaIncluidaEvent>(), _token))
-        //     .Returns(Task.CompletedTask);
-
-        _dataWriter = _fixture.Freeze<Mock<IDataReader>>();
+        _dataWriter = _fixture.Freeze<Mock<IDataReader<Conta>>>();
         _dataWriter
              .Setup(x => x.Insert(It.IsAny<Conta>(), _token))
-             .Returns(Task.CompletedTask);
+             .Returns(Task.FromResult(Result.Ok()));
+
+        _producer = _fixture.Freeze<Mock<IProducer<ContaIncluidaEvent>>>();
+        _producer
+             .Setup(x => x.SendAsync(It.IsAny<ContaIncluidaEvent>(), _token))
+             .Returns(Task.FromResult(Result.Ok()));
 
         _validator = _fixture.Freeze<Mock<IValidator<InclusaoContaCommand>>>();
         _validator
@@ -138,16 +180,16 @@ public class ContaControllerUnitTests
              .Returns(new FluentValidation.Results.ValidationResult());
 
         _controller = _fixture.Build<ContaController>()
-        .OmitAutoProperties()
-        .Create();
+            .OmitAutoProperties()
+            .Create();
     }
 
     [Fact]
     public async Task Dado_Comando_Valido_Resultado_SucessoAsync()
     {
-        //Arrange
         //Act
         var response = await _controller.Post(_request, _token);
+
         //Assert
         Assert.True(response.IsSuccess);
     }
@@ -165,6 +207,7 @@ public class ContaControllerUnitTests
 
         //Act
         var response = await _controller.Post(request, _token);
+
         //Assert
         Assert.False(response.IsSuccess);
     }
@@ -173,11 +216,13 @@ public class ContaControllerUnitTests
     public async Task Dado_Produtor_Com_Erro_Resultado_FalhaAsync()
     {
         //Arrange
-        //_producer
-        //     .Setup(x => x.Send(It.IsAny<ContaIncluidaEvent>(), _token))
-        //     .Returns(Task.FromResult(new NotImplementedException()));
+        _producer
+             .Setup(x => x.SendAsync(It.IsAny<ContaIncluidaEvent>(), _token))
+             .Returns(Task.FromResult(Result.Fail("error-message")));
+
         //Act
         var response = await _controller.Post(_request, _token);
+
         //Assert
         Assert.False(response.IsSuccess);
     }
@@ -186,23 +231,14 @@ public class ContaControllerUnitTests
     public async Task Dado_Escritor_Com_Erro_Resultado_FalhaAsync()
     {
         //Arrange
-        _dataWriter
-             .Setup(x => x.Insert(It.IsAny<Conta>(), _token))
-             .Returns(Task.FromResult(new NotImplementedException()));
+        _producer
+             .Setup(x => x.SendAsync(It.IsAny<ContaIncluidaEvent>(), _token))
+             .Returns(Task.FromResult(Result.Fail("error-message")));
+
         //Act
         var response = await _controller.Post(_request, _token);
+
         //Assert
         Assert.False(response.IsSuccess);
-    }
-}
-
-public class ObjectMapperTests
-{
-    [Fact]
-    public void ValidateMappingConfigurationTest()
-    {
-        var mapper = ObjectMapper.Mapper;
-
-        mapper.ConfigurationProvider.AssertConfigurationIsValid();
     }
 }

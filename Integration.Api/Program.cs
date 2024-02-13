@@ -1,6 +1,3 @@
-
-using Integration.Api.Controllers;
-
 namespace Integration.Api;
 
 public class Program
