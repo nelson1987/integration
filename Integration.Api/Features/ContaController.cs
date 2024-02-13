@@ -107,9 +107,9 @@ public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
 
     public async Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"Mensagem a ser produzida {nameof(@event)}.");
+        //_logger.LogInformation($"Mensagem a ser produzida {nameof(@event)}.");
         await _producer.Publish(@event, cancellationToken);
-        _logger.LogInformation($"Mensagem produzida {nameof(@event)}.");
+        //_logger.LogInformation($"Mensagem produzida {nameof(@event)}.");
         return Result.Ok();
 
     }
@@ -123,10 +123,17 @@ public class DataReader<TEvent> : IDataReader<TEvent> where TEvent : class
     private readonly IMongoCollection<TEvent> _collection;
     private readonly ILogger<Producer<TEvent>> _logger;
 
-    public DataReader(IMongoCollection<TEvent> collection, ILogger<Producer<TEvent>> logger)
+    public DataReader(ILogger<Producer<TEvent>> logger)
     {
-        _collection = collection;
         _logger = logger;
+        //    var mongoClient = new MongoClient(
+        //bookStoreDatabaseSettings.Value.ConnectionString);
+
+        //    var mongoDatabase = mongoClient.GetDatabase(
+        //        bookStoreDatabaseSettings.Value.DatabaseName);
+
+        //    _booksCollection = mongoDatabase.GetCollection<Pagamento>(
+        //        bookStoreDatabaseSettings.Value.BooksCollectionName);
     }
 
     public Task<Result> Insert(TEvent conta, CancellationToken cancellationToken)
@@ -136,10 +143,11 @@ public class DataReader<TEvent> : IDataReader<TEvent> where TEvent : class
 }
 public class ContaDataReader : DataReader<Conta>
 {
-    public ContaDataReader(IMongoCollection<Conta> collection, ILogger<Producer<Conta>> logger) : base(collection, logger)
+    public ContaDataReader(ILogger<Producer<Conta>> logger) : base(logger)
     {
     }
 }
+
 public interface IMongoContext
 {
     public IMongoCollection<Conta> Contas { get; }

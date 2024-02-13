@@ -24,7 +24,7 @@ public class ContaController : ControllerBase
         _validator = validator;
     }
 
-    [HttpPost(Name = "PostWeatherForecast")]
+    [HttpPost(Name = "PostConta")]
     public async Task<Result> Post(InclusaoContaCommand command, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(command);

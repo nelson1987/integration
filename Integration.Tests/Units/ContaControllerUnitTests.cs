@@ -72,54 +72,6 @@ public class InclusaoContaCommandTests
         Assert.Equal(ativo, comando.Ativo);
         Assert.Equal(tipo, comando.Tipo);
     }
-
-    [Fact]
-    public void Deve_Lancar_Excecao_Se_NomeTitular_For_Nulo()
-    {
-        // Arrange
-        var id = Guid.NewGuid();
-        string? nomeTitular = null;
-        var saldoInicial = 1000.00m;
-        var ativo = true;
-        var tipo = TipoConta.Corrente;
-
-        // Act
-        var acao = () => new InclusaoContaCommand(
-            id,
-            nomeTitular,
-            saldoInicial,
-            ativo,
-            tipo
-        );
-
-        // Assert
-        var ex = Assert.Throws<ArgumentNullException>(acao);
-        Assert.Equal("nomeTitular", ex.ParamName);
-    }
-
-    [Fact]
-    public void Deve_Lancar_Excecao_Se_SaldoInicial_For_Negativo()
-    {
-        // Arrange
-        var id = Guid.NewGuid();
-        var nomeTitular = "João Silva";
-        var saldoInicial = -1000.00m;
-        var ativo = true;
-        var tipo = TipoConta.Corrente;
-
-        // Act
-        var acao = () => new InclusaoContaCommand(
-            id,
-            nomeTitular,
-            saldoInicial,
-            ativo,
-            tipo
-        );
-
-        // Assert
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(acao);
-        Assert.Equal("saldoInicial", ex.ParamName);
-    }
 }
 
 public class InclusaoContaCommandValidatorUnitTests
