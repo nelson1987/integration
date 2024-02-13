@@ -108,11 +108,22 @@ public class ConsumeObserver : IConsumeObserver
         await Task.CompletedTask;
     }
 }
-public record InclusaoContaCommand
-{
-    public required string NumeroContaDebitada { get; set; }
+public record InclusaoContaCommand(
+    Guid Id, // Identificador único da conta (Guid)
+    string NomeTitular, // Nome do titular da conta (string)
+    decimal SaldoInicial, // Saldo inicial da conta (decimal)
+    bool Ativo, // Indica se a conta está ativa (bool)
+    TipoConta Tipo // Tipo da conta (enum)
+);
 
+public enum TipoConta
+{
+    Corrente,
+    Poupanca,
+    Salario
 }
+
+
 public static class ObjectMapper
 {
     private static readonly Lazy<IMapper> Lazy = new(() =>
@@ -129,7 +140,7 @@ public class InclusaoContaCommandValidator : AbstractValidator<InclusaoContaComm
 {
     public InclusaoContaCommandValidator()
     {
-        RuleFor(x => x.NumeroContaDebitada).NotEmpty();
+        RuleFor(x => x.NomeTitular).NotEmpty();
     }
 }
 public interface IProducer<TEvent> where TEvent : class
@@ -166,10 +177,10 @@ public record ContaIncluidaEvent
 {
     public Guid Id { get; set; }
     public required string Numero { get; set; }
-    public required string Documento { get; set; }
-    public decimal Saldo { get; set; }
-    public required string Titular { get; set; }
-    public required List<Transacao> Transacoes { get; set; }
+    //public required string Documento { get; set; }
+    //public decimal Saldo { get; set; }
+    //public required string Titular { get; set; }
+    //public required List<Transacao> Transacoes { get; set; }
 }
 public interface IDataReader
 {
@@ -219,8 +230,14 @@ public class AutomapperProfile : Profile
 {
     public AutomapperProfile()
     {
-        CreateMap<InclusaoContaCommand, Conta>();
+        CreateMap<InclusaoContaCommand, Conta>()
+.ForMember(x => x.Numero, y => y.Ignore())
+.ForMember(x => x.Documento, y => y.Ignore())
+.ForMember(x => x.Saldo, y => y.Ignore())
+.ForMember(x => x.Titular, y => y.Ignore())
+.ForMember(x => x.Transacoes, y => y.Ignore());
         CreateMap<Conta, ContaIncluidaEvent>();
+
         //.ForMember(x => x.Id, y => y.MapFrom());
     }
 }
@@ -307,8 +324,11 @@ public class ContaController : ControllerBase
 public class ContaIncluidaEventConsumer : IConsumer<ContaIncluidaEvent>
 {
     private readonly ILogger<ContaIncluidaEventConsumer> _logger;
+    public ContaIncluidaEventConsumer()
+    {
 
-    public ContaIncluidaEventConsumer(ILogger<ContaIncluidaEventConsumer> logger)
+    }
+    protected ContaIncluidaEventConsumer(ILogger<ContaIncluidaEventConsumer> logger) : this()
     {
         _logger = logger;
     }

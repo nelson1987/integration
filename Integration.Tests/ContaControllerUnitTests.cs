@@ -1,12 +1,85 @@
-using AutoFixture;
-using AutoFixture.AutoMoq;
-using FluentValidation;
-using FluentValidation.Results;
 using FluentValidation.TestHelper;
-using Integration.Api.Controllers;
-using Moq;
 
 namespace Integration.Tests;
+
+public class InclusaoContaCommandTests
+{
+    [Fact]
+    public void Deve_Criar_Comando_Com_Sucesso()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var nomeTitular = "João Silva";
+        var saldoInicial = 1000.00m;
+        var ativo = true;
+        var tipo = TipoConta.Corrente;
+
+        // Act
+        var comando = new InclusaoContaCommand(
+            id,
+            nomeTitular,
+            saldoInicial,
+            ativo,
+            tipo
+        );
+
+        // Assert
+        Assert.NotNull(comando);
+        Assert.Equal(id, comando.Id);
+        Assert.Equal(nomeTitular, comando.NomeTitular);
+        Assert.Equal(saldoInicial, comando.SaldoInicial);
+        Assert.Equal(ativo, comando.Ativo);
+        Assert.Equal(tipo, comando.Tipo);
+    }
+
+    [Fact]
+    public void Deve_Lancar_Excecao_Se_NomeTitular_For_Nulo()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        string? nomeTitular = null;
+        var saldoInicial = 1000.00m;
+        var ativo = true;
+        var tipo = TipoConta.Corrente;
+
+        // Act
+        var acao = () => new InclusaoContaCommand(
+            id,
+            nomeTitular,
+            saldoInicial,
+            ativo,
+            tipo
+        );
+
+        // Assert
+        var ex = Assert.Throws<ArgumentNullException>(acao);
+        Assert.Equal("nomeTitular", ex.ParamName);
+    }
+
+    [Fact]
+    public void Deve_Lancar_Excecao_Se_SaldoInicial_For_Negativo()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var nomeTitular = "João Silva";
+        var saldoInicial = -1000.00m;
+        var ativo = true;
+        var tipo = TipoConta.Corrente;
+
+        // Act
+        var acao = () => new InclusaoContaCommand(
+            id,
+            nomeTitular,
+            saldoInicial,
+            ativo,
+            tipo
+        );
+
+        // Assert
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(acao);
+        Assert.Equal("saldoInicial", ex.ParamName);
+    }
+}
 
 public class InclusaoContaCommandValidatorUnitTests
 {
@@ -30,11 +103,10 @@ public class InclusaoContaCommandValidatorUnitTests
     [Fact]
     public void Given_a_cancellation_request_with_invalid_asset_id_should_fail_validation()
         => _validator
-            .TestValidate(_command with { NumeroContaDebitada = string.Empty })
-            .ShouldHaveValidationErrorFor(x => x.NumeroContaDebitada)
+            .TestValidate(_command with { NomeTitular = string.Empty })
+            .ShouldHaveValidationErrorFor(x => x.NomeTitular)
             .Only();
 }
-
 public class ContaControllerUnitTests
 {
     private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -42,7 +114,7 @@ public class ContaControllerUnitTests
     private readonly ContaController _controller;
     private readonly InclusaoContaCommand _request;
     private readonly Mock<IValidator<InclusaoContaCommand>> _validator;
-    private readonly Mock<IProducer> _producer;
+    //private readonly Mock<IProducer> _producer;
     private readonly Mock<IDataReader> _dataWriter;
     public ContaControllerUnitTests()
     {
@@ -50,10 +122,10 @@ public class ContaControllerUnitTests
             //.With(x => x.OrderId, Guid.NewGuid())
             .Create();
 
-        _producer = _fixture.Freeze<Mock<IProducer>>();
-        _producer
-             .Setup(x => x.Send(It.IsAny<ContaIncluidaEvent>(), _token))
-             .Returns(Task.CompletedTask);
+        //_producer = _fixture.Freeze<Mock<IProducer>>();
+        //_producer
+        //     .Setup(x => x.Send(It.IsAny<ContaIncluidaEvent>(), _token))
+        //     .Returns(Task.CompletedTask);
 
         _dataWriter = _fixture.Freeze<Mock<IDataReader>>();
         _dataWriter
@@ -84,7 +156,7 @@ public class ContaControllerUnitTests
     public async Task Dado_Comando_invalido_Resultado_FalhaAsync()
     {
         //Arrange
-        var request = _request with { NumeroContaDebitada = string.Empty };
+        var request = _request with { NomeTitular = string.Empty };
 
         _validator
              .Setup(x => x.Validate(request))
