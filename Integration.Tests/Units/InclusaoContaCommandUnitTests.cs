@@ -1,6 +1,4 @@
-﻿using Integration.Core.Features.Entities;
-
-namespace Integration.Tests.Units;
+﻿namespace Integration.Tests.Units;
 
 public class InclusaoContaCommandUnitTests
 {

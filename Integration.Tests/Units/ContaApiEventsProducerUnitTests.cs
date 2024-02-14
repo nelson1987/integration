@@ -1,8 +1,4 @@
-﻿using Integration.Core.Features.Events;
-using Integration.Core.Features.Producers;
-using MassTransit;
-
-namespace Integration.Tests.Units;
+﻿namespace Integration.Tests.Units;
 
 public class ContaApiEventsProducerUnitTests
 {

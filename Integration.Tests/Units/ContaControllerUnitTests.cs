@@ -1,8 +1,3 @@
-using FluentResults;
-using Integration.Core.Features.Commands;
-using Integration.Core.Features.Entities;
-using Integration.Core.Features.Events;
-
 namespace Integration.Tests.Units;
 
 public class ContaControllerUnitTests

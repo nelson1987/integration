@@ -1,14 +1,4 @@
-﻿using Integration.Api;
-using Integration.Core.Features.Consumers;
-using Integration.Core.Features.Entities;
-using Integration.Core.Features.Events;
-using Integration.Core.Utils.Observers;
-using MassTransit;
-using MassTransit.Testing;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Net.Http.Json;
-
-namespace Integration.Tests.IntegrationTests;
+﻿namespace Integration.Tests.IntegrationTests;
 
 public class ContaIncluidaEventConsumerIntegrationTests
 {
@@ -48,6 +38,7 @@ public class ContaIncluidaEventConsumerIntegrationTests
         Assert.Equal(0, await testHarness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
 
         var submiteOrderResponse = await client.PostAsJsonAsync(submitOrderUrl, inclusaoConta, CancellationToken.None);
+
         submiteOrderResponse.EnsureSuccessStatusCode();
 
         Assert.True(await testHarness.Published.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
