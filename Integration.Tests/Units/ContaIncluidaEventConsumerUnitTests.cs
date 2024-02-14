@@ -1,4 +1,9 @@
-﻿namespace Integration.Tests.Units;
+﻿using Integration.Tests.IntegrationTests;
+using MassTransit;
+using MassTransit.Testing;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Integration.Tests.Units;
 
 public class ContaIncluidaEventConsumerUnitTests
 {

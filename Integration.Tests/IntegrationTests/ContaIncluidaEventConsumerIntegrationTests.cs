@@ -1,4 +1,10 @@
-﻿namespace Integration.Tests.IntegrationTests;
+﻿using Integration.Api;
+using MassTransit;
+using MassTransit.Testing;
+using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net.Http.Json;
+
+namespace Integration.Tests.IntegrationTests;
 
 public class ContaIncluidaEventConsumerIntegrationTests
 {
@@ -12,10 +18,6 @@ public class ContaIncluidaEventConsumerIntegrationTests
                 {
                     services.AddMassTransitTestHarness(x =>
                     {
-
-                        x.AddConsumeObserver<ConsumeObserver>();
-                        x.AddPublishObserver<PublishObserver>();
-
                         x.SetKebabCaseEndpointNameFormatter();
                         x.AddConsumer<ContaIncluidaEventConsumer>();
                         x.UsingRabbitMq((ctx, cfg) =>
@@ -61,10 +63,4 @@ public static class MassTransitExtensions
         var mensagem = await received.SelectAsync<TEvent>().FirstOrDefault();
         return mensagem.Context.Message;
     }
-    //public static async Task<ContaIncluidaEvent> ConsumedValue(this IReceivedMessageList received, Guid orderId)
-    //{
-    //    var mensagem = await received.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).FirstOrDefault();
-    //    return mensagem.Context.Message;
-    //}
-
 }

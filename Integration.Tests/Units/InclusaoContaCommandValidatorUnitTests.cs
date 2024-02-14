@@ -1,4 +1,8 @@
-﻿namespace Integration.Tests.Units;
+﻿using FluentValidation.TestHelper;
+using Integration.Core.Features.Commands;
+using Integration.Core.Features.Validators;
+
+namespace Integration.Tests.Units;
 
 public class InclusaoContaCommandValidatorUnitTests
 {

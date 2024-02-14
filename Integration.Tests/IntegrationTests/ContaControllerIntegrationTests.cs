@@ -1,4 +1,11 @@
-﻿namespace Integration.Tests.IntegrationTests;
+﻿using Integration.Api;
+using MassTransit;
+using MassTransit.Testing;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
+
+namespace Integration.Tests.IntegrationTests;
 public class ContaControllerIntegrationTests// : IAsyncLifetime
 {
     /*
@@ -70,10 +77,6 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
                 {
                     services.AddMassTransitTestHarness(x =>
                     {
-
-                        x.AddConsumeObserver<ConsumeObserver>();
-                        x.AddPublishObserver<PublishObserver>();
-
                         x.SetKebabCaseEndpointNameFormatter();
                         x.AddConsumer<ContaIncluidaEventConsumer>();
                         x.UsingRabbitMq((ctx, cfg) =>
@@ -120,10 +123,6 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
         await using var provider = new ServiceCollection()
             .AddMassTransitTestHarness(x =>
             {
-
-                x.AddConsumeObserver<ConsumeObserver>();
-                x.AddPublishObserver<PublishObserver>();
-
                 x.SetKebabCaseEndpointNameFormatter();
                 x.AddConsumer<ContaIncluidaEventConsumer>();
                 x.UsingRabbitMq((ctx, cfg) =>
@@ -161,9 +160,9 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
 
         Assert.Equal(1, await sagaHarness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
 
-        var mensgaem = await sagaHarness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).FirstOrDefault();
+        var mensgaem = await sagaHarness.Consumed.ConsumedValue<ContaIncluidaEvent>();
 
-        Assert.Equal(inclusaoConta.Id, mensgaem.Context.Message.Id);
-        Assert.Equal(inclusaoConta.Numero, mensgaem.Context.Message.Numero);
+        Assert.Equal(inclusaoConta.Id, mensgaem.Id);
+        Assert.Equal(inclusaoConta.Numero, mensgaem.Numero);
     }
 }
