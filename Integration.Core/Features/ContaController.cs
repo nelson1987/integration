@@ -35,9 +35,9 @@ public class Producer<TEvent> : IProducer<TEvent> where TEvent : class
 
     public async Task<Result> SendAsync(TEvent @event, CancellationToken cancellationToken)
     {
-        _logger.LogInformation($"Mensagem a ser produzida {nameof(@event)}.");
+        //_logger.LogInformation($"Mensagem a ser produzida @event.");
         await _producer.Publish(@event, cancellationToken);
-        _logger.LogInformation($"Mensagem produzida {nameof(@event)}.");
+        //_logger.LogInformation($"Mensagem produzida @event.");
         return Result.Ok();
 
     }

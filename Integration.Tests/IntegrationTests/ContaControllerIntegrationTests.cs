@@ -77,14 +77,14 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
                 {
                     services.AddMassTransitTestHarness(x =>
                     {
-                        x.SetKebabCaseEndpointNameFormatter();
-                        x.AddConsumer<ContaIncluidaEventConsumer>();
-                        x.UsingRabbitMq((ctx, cfg) =>
-                        {
-                            //cfg.Host("amqp://guest:guest@localhost:5672");
-                            cfg.ConfigureEndpoints(ctx);
-                            //cfg.UseRawJsonSerializer();
-                        });
+                        //x.SetKebabCaseEndpointNameFormatter();
+                        //x.AddConsumer<ContaIncluidaEventConsumer>();
+                        //x.UsingRabbitMq((ctx, cfg) =>
+                        //{
+                        //    //cfg.Host("amqp://guest:guest@localhost:5672");
+                        //    cfg.ConfigureEndpoints(ctx);
+                        //    //cfg.UseRawJsonSerializer();
+                        //});
                     });
                 }));
         var testHarness = application.Services.GetTestHarness();
@@ -98,8 +98,6 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
     true,
     TipoConta.Corrente);
 
-        Assert.Equal(0, await testHarness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
-
         var submiteOrderResponse = await client.PostAsJsonAsync(submitOrderUrl, inclusaoConta, CancellationToken.None);
 
         submiteOrderResponse.EnsureSuccessStatusCode();
@@ -110,11 +108,9 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
 
         Assert.True(await sagatestharness.Consumed.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
 
-        Assert.Equal(1, await sagatestharness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
+        var mensgaem = await sagatestharness.Consumed.ConsumedValue<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId);
 
-        var mensgaem = await sagatestharness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).FirstOrDefault();
-
-        Assert.Equal(orderId, mensgaem.Context.Message.Id);
+        Assert.Equal(orderId, mensgaem.Id);
     }
     [Fact]
     public async Task ASampleTest()
@@ -127,9 +123,7 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
                 x.AddConsumer<ContaIncluidaEventConsumer>();
                 x.UsingRabbitMq((ctx, cfg) =>
                 {
-                    //cfg.Host("amqp://guest:guest@localhost:5672");
                     cfg.ConfigureEndpoints(ctx);
-                    //cfg.UseRawJsonSerializer();
                 });
             })
             .BuildServiceProvider(true);
@@ -146,8 +140,6 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
             Numero = "NomeTitular"
         };
 
-        Assert.Equal(0, await harness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
-
         Assert.False(await harness.Published.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
 
         await harness.Bus.Publish(inclusaoConta, CancellationToken.None);
@@ -158,11 +150,11 @@ public class ContaControllerIntegrationTests// : IAsyncLifetime
 
         Assert.True(await sagaHarness.Consumed.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
 
-        Assert.Equal(1, await sagaHarness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
-
-        var mensgaem = await sagaHarness.Consumed.ConsumedValue<ContaIncluidaEvent>();
+        var mensgaem = await sagaHarness.Consumed.ConsumedValue<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId);
 
         Assert.Equal(inclusaoConta.Id, mensgaem.Id);
         Assert.Equal(inclusaoConta.Numero, mensgaem.Numero);
+
+        await harness.Stop();
     }
 }

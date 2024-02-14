@@ -16,9 +16,9 @@ public class ContaIncluidaEventConsumer : IConsumer<ContaIncluidaEvent>
 
     public Task Consume(ConsumeContext<ContaIncluidaEvent> context)
     {
-        _logger.LogInformation($"Mensagem a ser produzida {nameof(ContaIncluidaEvent)}.");
+        //_logger.LogInformation($"Mensagem a ser produzida ContaIncluidaEvent.");
         ContaIncluidaEvent @event = context.Message;
-        _logger.LogInformation($"Mensagem produzida {nameof(ContaIncluidaEvent)}.");
+        //_logger.LogInformation($"Mensagem produzida ContaIncluidaEvent.");
         return Task.CompletedTask;
     }
 

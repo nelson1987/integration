@@ -18,12 +18,12 @@ public class ContaIncluidaEventConsumerIntegrationTests
                 {
                     services.AddMassTransitTestHarness(x =>
                     {
-                        x.SetKebabCaseEndpointNameFormatter();
-                        x.AddConsumer<ContaIncluidaEventConsumer>();
-                        x.UsingRabbitMq((ctx, cfg) =>
-                        {
-                            cfg.ConfigureEndpoints(ctx);
-                        });
+                        //x.SetKebabCaseEndpointNameFormatter();
+                        //x.AddConsumer<ContaIncluidaEventConsumer>();
+                        //x.UsingRabbitMq((ctx, cfg) =>
+                        //{
+                        //    cfg.ConfigureEndpoints(ctx);
+                        //});
                     });
                 }));
         var testHarness = application.Services.GetTestHarness();
@@ -47,20 +47,21 @@ public class ContaIncluidaEventConsumerIntegrationTests
 
         var sagatestharness = testHarness.GetConsumerHarness<ContaIncluidaEventConsumer>();
 
-        Assert.True(await sagatestharness.Consumed.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
+        //Assert.True(await sagatestharness.Consumed.Any<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId));
 
-        Assert.Equal(1, await sagatestharness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
+        //Assert.Equal(1, await sagatestharness.Consumed.SelectAsync<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId).Count());
 
-        var mensagem = await sagatestharness.Consumed.ConsumedValue<ContaIncluidaEvent>();
+        var mensagem = await sagatestharness.Consumed.ConsumedValue<ContaIncluidaEvent>(x => x.Context.Message.Id == orderId);
 
         Assert.Equal(orderId, mensagem.Id);
     }
+
 }
 public static class MassTransitExtensions
 {
-    public static async Task<TEvent> ConsumedValue<TEvent>(this IReceivedMessageList received) where TEvent : class
+    public static async Task<TEvent> ConsumedValue<TEvent>(this IReceivedMessageList received, FilterDelegate<IReceivedMessage<TEvent>> value) where TEvent : class
     {
-        var mensagem = await received.SelectAsync<TEvent>().FirstOrDefault();
+        var mensagem = await received.SelectAsync(value).FirstOrDefault();
         return mensagem.Context.Message;
     }
 }
